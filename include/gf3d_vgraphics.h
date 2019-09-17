@@ -19,7 +19,9 @@ void gf3d_vgraphics_init(
     int renderHeight,
     Vector4D bgcolor,
     Bool fullscreen,
-    Bool enableValidation
+    Bool enableValidation, 
+	Bool disableTrace, 
+	Bool disableDump
 );
 
 /**

@@ -53,3 +53,8 @@ dkms.conf
 makefile.dep
 gf3d
 *.log
+*.dds
+*.mtl
+
+Debug/
+Release/

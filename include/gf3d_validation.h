@@ -6,7 +6,7 @@
 /**
  * @brief Setup Vulkan Validation Layers
  */
-void gf3d_validation_init();
+void gf3d_validation_init(Bool disableTrace, Bool disableDump);
 
 /**
  * @brief get the array address for the validation layers

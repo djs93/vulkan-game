@@ -97,7 +97,9 @@ void gf3d_vgraphics_init(
     int renderHeight,
     Vector4D bgcolor,
     Bool fullscreen,
-    Bool enableValidation
+    Bool enableValidation, 
+	Bool disableTrace, 
+	Bool disableDump
 )
 {
     VkDevice device;
@@ -127,7 +129,9 @@ void gf3d_vgraphics_init(
         renderHeight,
         bgcolor,
         fullscreen,
-        enableValidation);
+        enableValidation, 
+		disableTrace,
+		disableDump);
     
     device = gf3d_vgraphics_get_default_logical_device();
 
@@ -161,7 +165,9 @@ void gf3d_vgraphics_setup(
     int renderHeight,
     Vector4D bgcolor,
     Bool fullscreen,
-    Bool enableValidation
+    Bool enableValidation, 
+	Bool disableTrace, 
+	Bool disableDump
 )
 {
     Uint32 flags = SDL_WINDOW_VULKAN;
@@ -240,7 +246,7 @@ void gf3d_vgraphics_setup(
     if (enableValidation)
     {
         gf3d_vgraphics.enableValidationLayers = true;
-        gf3d_validation_init();
+        gf3d_validation_init(disableTrace, disableDump);
         gf3d_vgraphics.vk_instance_info.enabledLayerCount = gf3d_validation_get_validation_layer_count();
         gf3d_vgraphics.vk_instance_info.ppEnabledLayerNames = gf3d_validation_get_validation_layer_names();
         gf3d_extensions_enable(ET_Instance,"VK_EXT_debug_utils");
@@ -481,14 +487,15 @@ Bool gf3d_vgraphics_device_validate(VkPhysicalDevice device)
     slog("apiVersion: %i",deviceProperties.apiVersion);
     slog("driverVersion: %i",deviceProperties.driverVersion);
     slog("supports Geometry Shader: %i",deviceFeatures.geometryShader);
-    return (deviceProperties.deviceType == GF3D_VGRAPHICS_DISCRETE)&&(deviceFeatures.geometryShader);
+    return ((deviceProperties.deviceType == GF3D_VGRAPHICS_DISCRETE)||(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU))&&(deviceFeatures.geometryShader);
 }
 
 VkPhysicalDevice gf3d_vgraphics_select_device()
 {
     int i;
     VkPhysicalDevice chosen = VK_NULL_HANDLE;
-    for (i = 0; i < gf3d_vgraphics.device_count; i++)
+
+	for (i = 0; i < gf3d_vgraphics.device_count; i++)
     {
         if (gf3d_vgraphics_device_validate(gf3d_vgraphics.devices[i]))
         {

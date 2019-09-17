@@ -19,9 +19,12 @@ typedef struct
 
 static vValidation gf3d_validation = {0};
 
-void gf3d_validation_query_layer_properties()
+void gf3d_validation_query_layer_properties(Bool disableTrace, Bool disableDump)
 {
     int i;
+	int disabledLayers = 0;
+	int place = 0;
+
     vkEnumerateInstanceLayerProperties(&gf3d_validation.layerCount, NULL);
     slog("discovered %i validation layers",gf3d_validation.layerCount);
     
@@ -30,12 +33,37 @@ void gf3d_validation_query_layer_properties()
     gf3d_validation.availableLayers = (VkLayerProperties *)gfc_allocate_array(sizeof(VkLayerProperties),gf3d_validation.layerCount);
     vkEnumerateInstanceLayerProperties(&gf3d_validation.layerCount, gf3d_validation.availableLayers);
     
-    gf3d_validation.layerNames = (const char* * )gfc_allocate_array(sizeof(const char *),gf3d_validation.layerCount);
-    for (i = 0; i < gf3d_validation.layerCount;i++)
+	for (i = 0; i < gf3d_validation.layerCount; i++)
+	{
+		if (disableTrace && strcmp(gf3d_validation.availableLayers[i].layerName, "VK_LAYER_LUNARG_vktrace") == 0) {
+			disabledLayers++;
+		}
+		else if (disableDump && strcmp(gf3d_validation.availableLayers[i].layerName, "VK_LAYER_LUNARG_api_dump") == 0) {
+			disabledLayers++;
+		}
+	}
+
+	int enabledLayers = gf3d_validation.layerCount - disabledLayers;
+    gf3d_validation.layerNames = (const char* * )gfc_allocate_array(sizeof(const char *),enabledLayers);
+	slog("Disabling %i layers", disabledLayers);
+	i = 0;
+    while (i < gf3d_validation.layerCount) //loop through all available layers, skip those that are disabled
     {
-        gf3d_validation.layerNames[i] = (const char *)gf3d_validation.availableLayers[i].layerName;
-        slog("Validation layer available: %s",gf3d_validation.availableLayers[i].layerName);
+		if (disableTrace && strcmp(gf3d_validation.availableLayers[i].layerName, "VK_LAYER_LUNARG_vktrace") == 0) {
+			slog("Did not enable %s", gf3d_validation.availableLayers[i].layerName);
+		}
+		else if (disableDump && strcmp(gf3d_validation.availableLayers[i].layerName, "VK_LAYER_LUNARG_api_dump") == 0) {
+			slog("Did not enable %s", gf3d_validation.availableLayers[i].layerName);
+		}
+		else {
+			gf3d_validation.layerNames[place] = (const char*)gf3d_validation.availableLayers[i].layerName;
+			slog("Validation layer available: %s", gf3d_validation.availableLayers[i].layerName);
+			place++;
+		}
+		i++;
     }
+
+	gf3d_validation.layerCount = enabledLayers;
 }
 
 void gf3d_validation_close()
@@ -53,9 +81,9 @@ void gf3d_validation_close()
     memset(&gf3d_validation,0,sizeof(vValidation));
 }
 
-void gf3d_validation_init()
+void gf3d_validation_init(Bool disableTrace, Bool disableDump)
 {
-    gf3d_validation_query_layer_properties();
+    gf3d_validation_query_layer_properties(disableTrace, disableDump);
     atexit(gf3d_validation_close);
 }
 

@@ -16,6 +16,8 @@ int main(int argc,char *argv[])
     int done = 0;
     int a;
     Uint8 validate = 1;
+	Uint8 dump = 0;
+	Uint8 trace = 0;
     const Uint8 * keys;
     Uint32 bufferFrame = 0;
     VkCommandBuffer commandBuffer;
@@ -30,7 +32,16 @@ int main(int argc,char *argv[])
         {
             validate = 0;
         }
+		else if (strcmp(argv[a], "-disable_vktrace") == 0) 
+		{
+			trace = 1;
+		}
+		else if (strcmp(argv[a], "-disable_api_dump") == 0)
+		{
+			dump = 1;
+		}
     }
+	//validate = 0;
     
     init_logger("gf3d.log");    
     slog("gf3d begin");
@@ -40,7 +51,9 @@ int main(int argc,char *argv[])
         700,                    //screen height
         vector4d(0.51,0.75,1,1),//background color
         0,                      //fullscreen
-        validate                //validation
+        validate,               //validation
+		trace,					//vktrace validation layer
+		dump					//api dump validation layer
     );
     
     // main game loop
@@ -59,16 +72,17 @@ int main(int argc,char *argv[])
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
         //update game things here
         
-        gf3d_vgraphics_rotate_camera(0.001);
+		//Multiplied each default speed by a factor of 10 because it was moving too slowly (Dale)
+        gf3d_vgraphics_rotate_camera(0.01);
         gfc_matrix_rotate(
             modelMat,
             modelMat,
-            0.002,
+            0.02,
             vector3d(1,0,0));
         gfc_matrix_rotate(
             modelMat2,
             modelMat2,
-            0.002,
+            0.02,
             vector3d(0,0,1));
 
         // configure render command for graphics command pool
