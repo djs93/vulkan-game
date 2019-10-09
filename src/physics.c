@@ -12,8 +12,6 @@ void update_physics_positions() {
 		if (gf3d_entity_manager.entity_list[i]._inuse == 0) {
 			break;
 		}
-		//set matrix according to rotation & position
-		gfc_matrix_from_rotation(gf3d_entity_manager.entity_list[i].modelMat, gf3d_entity_manager.entity_list[i].rotation);
 		i++;
 	}
 }

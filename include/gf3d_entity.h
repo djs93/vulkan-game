@@ -15,11 +15,11 @@ typedef struct Entity_S
 	char*			name;			/**<name of the entity*/
     Uint8           _inuse;         /**<flag to keep track if this isntance is in use and should not be reassigned*/
     Model          *model;          /**<the 3d model for this entity*/
-	Matrix4			*modelMat;		/**<the model matrix*/
-    Vector3D         position;       /**<position of the entity in 3d space*/
+	Matrix4			modelMat;		/**<the model matrix*/
+    Vector3D         position;       /**<DO NOT DIRECTLY MODIFY - position of the entity in 3d space*/
     Vector3D         velocity;       /**<velocity of the entity in 3d space*/
     Vector3D         acceleration;   /**<acceleration of the entity in 3d space*/
-    Vector4D         rotation;       /**<yaw, pitch, and roll of the entity*/
+    Vector3D         rotation;       /**<yaw, pitch, and roll of the entity*/
     Vector3D         scale;          /**<*please default to 1,1,1*/
     EntityState     state;          /**<current state of the entity*/
     void (*think)(struct Entity_S* self);   /**<function called on entity think*/
@@ -64,5 +64,7 @@ void    gf3d_entity_free(Entity *self);
 int get_entity(char* name);
 
 EntityManager get_entity_manager();
+
+void rotate_entity(Entity* entity, float radians, Vector3D axis);
 
 #endif

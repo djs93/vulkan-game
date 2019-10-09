@@ -24,11 +24,12 @@ int main(int argc,char *argv[])
     Uint32 bufferFrame = 0;
     VkCommandBuffer commandBuffer;
     Model *model;
-    Matrix4 *modelMat;
+    Matrix4 modelMat;
     Model *model2;
-    Matrix4 *modelMat2;
+    Matrix4 modelMat2;
 	Model *model3;
-    Matrix4 *modelMat3;
+	Vector3D testvec = vector3d(1.f, 0.f, 0.f);
+
     
     for (a = 1; a < argc;a++)
     {
@@ -72,18 +73,20 @@ int main(int argc,char *argv[])
 	Entity* ent1 = gf3d_entity_new();
     ent1->model = model;
 	gfc_matrix_identity(modelMat);
-	ent1->modelMat = modelMat;
+	gfc_matrix_copy(ent1->modelMat, modelMat);
+	//ent1->modelMat = modelMat;
 	Entity* ent2 = gf3d_entity_new();
 	ent2->model = model2;
 	gfc_matrix_identity(modelMat2);
-	ent2->modelMat = modelMat2;
+	gfc_matrix_copy(ent2->modelMat, modelMat2);
+	//ent2->modelMat = modelMat2;
     gfc_matrix_make_translation(
-            modelMat2,
+		ent2->modelMat,
             vector3d(10,0,0)
         );
-	gfc_matrix_identity(modelMat3);
 	#pragma endregion
-
+	float x, y, z = 0.;
+	Vector3D forward;
     while(!done)
     {
         SDL_PumpEvents();   // update SDL's internal event structures
@@ -91,7 +94,56 @@ int main(int argc,char *argv[])
         //update game things here
         
 		//Update physics for each entity
-		vector4d_rotate(&ent1->rotation, 0.02, vector3d(0, 0, 1));
+		//vector4d_rotate(&ent1->rotation, 0.02, vector3d(0, 0, 1));
+		//vector3d_rotate_about_vector(&ent1->rotation, vector3d(0, 0, 1), ent1->rotation, 0.02);
+		if (keys[SDL_SCANCODE_RIGHT]) { 
+			rotate_entity(ent1, 0.02, vector3d(0, 0, 1));
+		}
+		if (keys[SDL_SCANCODE_LEFT]) {
+			rotate_entity(ent1, -0.02, vector3d(0, 0, 1));
+		}
+		if (keys[SDL_SCANCODE_UP]) {
+			rotate_entity(ent1, 0.02, vector3d(1, 0, 0));
+		}
+		if (keys[SDL_SCANCODE_DOWN]) {
+			rotate_entity(ent1, -0.02, vector3d(1, 0, 0));
+		}
+		if (keys[SDL_SCANCODE_X]) {
+			rotate_entity(ent1, 0.02, vector3d(1, 0, 0));
+		}
+		if (keys[SDL_SCANCODE_Y]) {
+			rotate_entity(ent1, 0.02, vector3d(0, 1, 0));
+		}
+		if (keys[SDL_SCANCODE_Z]) {
+			rotate_entity(ent1, 0.02, vector3d(0, 0, 1));
+		}
+		if (keys[SDL_SCANCODE_L]) {
+			float sy = sqrt(pow(ent1->modelMat[0][0], 2) + pow(ent1->modelMat[1][0], 2));
+			
+			Bool singular = sy < 0.000001f;
+			if (!singular) {
+				x = atan2(ent1->modelMat[2][1], ent1->modelMat[2][2]) * GFC_RADTODEG;
+				y = atan2(-ent1->modelMat[2][0], sy) * GFC_RADTODEG;
+				z = atan2(ent1->modelMat[1][0], ent1->modelMat[0][0]) * GFC_RADTODEG;
+			}
+			else {
+				x = atan2(-ent1->modelMat[1][2], ent1->modelMat[1][1]) * GFC_RADTODEG;
+				y = atan2(-ent1->modelMat[2][0], sy)* GFC_RADTODEG;
+				z = 0;
+			}
+			vector3d_angle_vectors(vector3d(x, y, z), &forward, NULL, NULL);
+			rotate_entity(ent2, 0.02, forward);
+		}
+		if (keys[SDL_SCANCODE_KP_0]) {
+			gfc_matrix_identity(ent1->modelMat);
+			gfc_matrix_identity(ent2->modelMat);
+		}
+		if (keys[SDL_SCANCODE_KP_PERIOD]) {
+			slog("\nx:%f\ny:%f\nz:%f", x, y, z);
+			//gfc_matrix_slog(ent1->modelMat);
+			//slog("\nx:%f\ny:%f\nz:%f", forward.x, forward.y, forward.z);
+		}
+
 
 		update_physics_positions();
 
@@ -105,9 +157,9 @@ int main(int argc,char *argv[])
         bufferFrame = gf3d_vgraphics_render_begin();
         gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_pipeline(),bufferFrame);
             commandBuffer = gf3d_command_rendering_begin(bufferFrame);
-
-                gf3d_model_draw(ent1->model,bufferFrame,commandBuffer,modelMat);
-                gf3d_model_draw(ent2->model,bufferFrame,commandBuffer,modelMat2);
+				//Make a "draw entities" function that does all this for each entity
+                gf3d_model_draw(ent1->model,bufferFrame,commandBuffer, ent1->modelMat);
+                gf3d_model_draw(ent2->model,bufferFrame,commandBuffer, ent2->modelMat);
                 
             gf3d_command_rendering_end(commandBuffer);
             

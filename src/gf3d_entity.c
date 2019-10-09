@@ -81,5 +81,12 @@ EntityManager get_entity_manager() {
 	return gf3d_entity_manager;
 }
 
+void rotate_entity(Entity* entity, float radians, Vector3D axis) {
+	if (!entity->modelMat) {
+		slog("No model matrix for entity %s", entity->name);
+	}
+	gfc_matrix_rotate(entity->modelMat, entity->modelMat, radians, axis);
+}
+
 
 /*eol@eof*/
