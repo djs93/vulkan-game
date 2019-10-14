@@ -42,8 +42,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\schof\Desktop\Sorted Folders\Git\vulkan-game\gfc\simple_json\include;C:\Users\schof\Desktop\Sorted Folders\Git\vulkan-game\gfc\simple_logger\include;C:\Users\schof\Desktop\Sorted Folders\Git\vulkan-game\gfc\include;C:\Users\schof\Desktop\Sorted Folders\Git\vulkan-game\include;C:\VulkanSDK\1.1.121.2\Include;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_ttf-2.0.15\include;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_mixer-2.0.4\include;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_image-2.0.5\include;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2-2.0.10\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\VulkanSDK\1.1.121.2\Lib32;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_ttf-2.0.15\lib\x86;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_mixer-2.0.4\lib\x86;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_image-2.0.5\lib\x86;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2-2.0.10\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\schof\Desktop\Sorted Folders\git\gf3d\gfc\simple_json\include;C:\Users\schof\Desktop\Sorted Folders\Git\vulkan-game\gfc\simple_json\include;C:\Users\schof\Desktop\Sorted Folders\git\gf3d\gfc\simple_logger\include;C:\Users\schof\Desktop\Sorted Folders\Git\vulkan-game\gfc\simple_logger\include;C:\Users\schof\Desktop\Sorted Folders\git\gf3d\gfc\include;C:\Users\schof\Desktop\Sorted Folders\Git\vulkan-game\gfc\include;C:\Users\schof\Desktop\Sorted Folders\git\gf3d\include;C:\Users\schof\Desktop\Sorted Folders\Git\vulkan-game\include;C:\VulkanSDK\1.1.114.0\Include;C:\VulkanSDK\1.1.121.2\Include;C:\Users\schof\Desktop\Sorted Folders\git\libs\SDL2_ttf-2.0.15\include;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_ttf-2.0.15\include;C:\Users\schof\Desktop\Sorted Folders\git\libs\SDL2_mixer-2.0.4\include;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_mixer-2.0.4\include;C:\Users\schof\Desktop\Sorted Folders\git\libs\SDL2_image-2.0.5\include;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_image-2.0.5\include;C:\Users\schof\Desktop\Sorted Folders\git\libs\SDL2-2.0.10\include;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2-2.0.10\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\VulkanSDK\1.1.114.0\Lib32;C:\VulkanSDK\1.1.121.2\Lib32;C:\Users\schof\Desktop\Sorted Folders\git\libs\SDL2_ttf-2.0.15\lib\x86;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_ttf-2.0.15\lib\x86;C:\Users\schof\Desktop\Sorted Folders\git\libs\SDL2_mixer-2.0.4\lib\x86;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_mixer-2.0.4\lib\x86;C:\Users\schof\Desktop\Sorted Folders\git\libs\SDL2_image-2.0.5\lib\x86;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2_image-2.0.5\lib\x86;C:\Users\schof\Desktop\Sorted Folders\git\libs\SDL2-2.0.10\lib\x86;C:\Users\schof\Desktop\Sorted Folders\Git\libs\SDL2-2.0.10\lib\x86;$(LibraryPath)</LibraryPath>
     <OutDir>..\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -115,6 +115,7 @@
     <ClInclude Include="..\include\gf3d_vgraphics.h" />
     <ClInclude Include="..\include\gf3d_vqueues.h" />
     <ClInclude Include="..\include\linmath.h" />
+    <ClInclude Include="..\include\local.h" />
     <ClInclude Include="..\include\physics.h" />
   </ItemGroup>
   <ItemGroup>

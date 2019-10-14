@@ -108,6 +108,9 @@
     <ClInclude Include="..\include\physics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\gfc\simple_json\src\simple_json.c">

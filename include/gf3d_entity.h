@@ -22,11 +22,14 @@ typedef struct Entity_S
     Vector3D         rotation;       /**<yaw, pitch, and roll of the entity*/
     Vector3D         scale;          /**<*please default to 1,1,1*/
     EntityState     state;          /**<current state of the entity*/
+    void (*prethink)(struct Entity_S* self);   /**<function called before entity think*/
     void (*think)(struct Entity_S* self);   /**<function called on entity think*/
     void (*update)(struct Entity_S* self);   /**<function called on entity update*/
     void (*touch)(struct Entity_S* self,struct Entity_S* other);   /**<function called when an entity touches another*/
     float           health;
     float           healthmax;
+	int movetype;					/**<type of movement*/
+	float nextthink;
     void *data;                     /**<additional entity specific data*/
     
 }Entity;

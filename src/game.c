@@ -145,7 +145,9 @@ int main(int argc,char *argv[])
 		}
 
 
-		update_physics_positions();
+		for (int i = 0; i < gf3d_entity_manager.entity_max; i++) {
+			run_entity(&gf3d_entity_manager.entity_list[i]);
+		}
 
 		//Multiplied each default speed by a factor of 10 because it was moving too slowly (Dale)
         //gf3d_vgraphics_rotate_camera(0.01);
