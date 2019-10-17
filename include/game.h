@@ -1,0 +1,1 @@
+#define SVF_MONSTER 0x00000004

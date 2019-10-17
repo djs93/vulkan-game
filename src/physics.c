@@ -35,7 +35,7 @@ void run_entity(Entity* ent)
 	}
 }
 
-void run_think(Entity* ent) {
+Bool run_think(Entity* ent) {
 	float	thinktime;
 
 	thinktime = ent->nextthink;
@@ -45,8 +45,10 @@ void run_think(Entity* ent) {
 		return true;
 
 	ent->nextthink = 0;
-	if (!ent->think)
-		gi.error("NULL ent->think");
+	if (!ent->think) {
+		slog("NULL ent->think");
+		return true;
+	}
 	ent->think(ent);
 
 	return false;

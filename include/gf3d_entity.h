@@ -30,6 +30,15 @@ typedef struct Entity_S
     float           healthmax;
 	int movetype;					/**<type of movement*/
 	float nextthink;
+	int frame;
+	Vector3D origin;
+	Vector3D old_origin;
+	Entity* groundentity;
+	int linkcount;
+	int groundentity_linkcount;
+
+	int flags;
+	int svflags;
     void *data;                     /**<additional entity specific data*/
     
 }Entity;

@@ -12,6 +12,9 @@
 #include "gf3d_texture.h"
 #include "gf3d_entity.h"
 #include "physics.h"
+#include "local.h"
+
+level_locals level;
 
 int main(int argc,char *argv[])
 {
@@ -178,4 +181,35 @@ int main(int argc,char *argv[])
     return 0;
 }
 
+void RunFrame() {
+	int i;
+	Entity* ent;
+
+	level.framenum++;
+	level.time = level.framenum * FRAMETIME;
+
+	ent = &gf3d_entity_manager.entity_list[0];
+	for (i = 0; i < gf3d_entity_manager.entity_max; i++, ent++) {
+		if (!ent->_inuse) {
+			continue;
+		}
+
+		level.current_entity = ent;
+
+		vector3d_copy(ent->old_origin, ent->origin);
+
+		//if the ground entity moved, make sure we're still on it
+		if ((ent->groundentity) && (ent->groundentity->linkcount != ent->groundentity_linkcount))
+		{
+			ent->groundentity = NULL;
+			if (!(ent->flags & FL_FLY) && (ent->svflags & SVF_MONSTER))
+			{
+				//Implement later:
+				//M_CheckGround(ent);
+			}
+		}
+
+		run_entity(ent);
+	}
+}
 /*eol@eof*/
