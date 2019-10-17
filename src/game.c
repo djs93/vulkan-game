@@ -15,6 +15,7 @@
 #include "local.h"
 
 level_locals level;
+Entity_T* entity_list;
 
 int main(int argc,char *argv[])
 {
@@ -72,14 +73,19 @@ int main(int argc,char *argv[])
 	model = gf3d_model_load("ezreal");
 	model2 = gf3d_model_load("ezreal");
 	model3 = gf3d_model_load("dino");
-	gf3d_entity_manager_init(2);
-	Entity* ent1 = gf3d_entity_new();
+	gf3d_entity_manager_init(ENTITY_MAX);
+	Entity_T* ent1 = gf3d_entity_new();
     ent1->model = model;
+	ent1->name = "Ezreal1";
+	ent1->movetype = MOVETYPE_STEP;
+	slog("Entities now: %i", gf3d_entity_manager.num_ents);
 	gfc_matrix_identity(modelMat);
 	gfc_matrix_copy(ent1->modelMat, modelMat);
 	//ent1->modelMat = modelMat;
-	Entity* ent2 = gf3d_entity_new();
+	Entity_T* ent2 = gf3d_entity_new();
 	ent2->model = model2;
+	ent2->name = "Ezreal2";
+	ent2->movetype = MOVETYPE_STEP;
 	gfc_matrix_identity(modelMat2);
 	gfc_matrix_copy(ent2->modelMat, modelMat2);
 	//ent2->modelMat = modelMat2;
@@ -147,9 +153,8 @@ int main(int argc,char *argv[])
 			//slog("\nx:%f\ny:%f\nz:%f", forward.x, forward.y, forward.z);
 		}
 
-
 		for (int i = 0; i < gf3d_entity_manager.entity_max; i++) {
-			run_entity(&gf3d_entity_manager.entity_list[i]);
+			run_entity(&entity_list[i]);
 		}
 
 		//Multiplied each default speed by a factor of 10 because it was moving too slowly (Dale)
@@ -183,12 +188,12 @@ int main(int argc,char *argv[])
 
 void RunFrame() {
 	int i;
-	Entity* ent;
+	Entity_T* ent;
 
 	level.framenum++;
 	level.time = level.framenum * FRAMETIME;
 
-	ent = &gf3d_entity_manager.entity_list[0];
+	ent = &entity_list[0];
 	for (i = 0; i < gf3d_entity_manager.entity_max; i++, ent++) {
 		if (!ent->_inuse) {
 			continue;
@@ -211,5 +216,9 @@ void RunFrame() {
 
 		run_entity(ent);
 	}
+}
+
+void TestThink(Entity_T* self) {
+	slog("My name is %s", self->name);
 }
 /*eol@eof*/

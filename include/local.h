@@ -1,12 +1,14 @@
+
+#ifndef __LOCAL_H__
+#define __LOCAL_H__
+
 #define FRAMETIME 0.1
 
 #define FL_FLY 0x00000001
 
 #include "game.h"
 
-#ifndef __LOCAL_H__
-#define __LOCAL_H__
-
+extern Entity_T* entity_list;
 // edict->movetype values
 typedef enum
 {
@@ -30,11 +32,11 @@ typedef struct {
 	char mapname[32];
 	char nextmap[32];
 
-	Entity* sight_client;
-	Entity* sight_entity;
+	Entity_T* sight_client;
+	Entity_T* sight_entity;
 	int sight_entity_framenum;
 
-	Entity* current_entity;
+	Entity_T* current_entity;
 } level_locals;
 
 extern level_locals level;

@@ -2,6 +2,7 @@
 #define __GF3D_ENTITY_H__
 
 #include "gf3d_model.h"
+#include "local.h"
 
 typedef enum
 {
@@ -33,7 +34,7 @@ typedef struct Entity_S
 	int frame;
 	Vector3D origin;
 	Vector3D old_origin;
-	Entity* groundentity;
+	Entity_T* groundentity;
 	int linkcount;
 	int groundentity_linkcount;
 
@@ -45,11 +46,12 @@ typedef struct Entity_S
 
 typedef struct
 {
-	Entity* entity_list;
+	Entity_T* entity_list;
 	Uint32  entity_max;
+	Uint32	num_ents;
 }EntityManager;
 
-static EntityManager gf3d_entity_manager = { 0 };
+static EntityManager gf3d_entity_manager = { 0, ENTITY_MAX };
 /**
  * @brief initializes the entity subsystem
  * @param entity_max maximum number of simultaneous entities you wish to support
@@ -73,7 +75,7 @@ void    gf3d_entity_free(Entity *self);
 * @param name the name of the entity to find
 * @return the index of the entity in the entity list
 */
-int get_entity(char* name);
+Entity_T* find_entity(char* name);
 
 EntityManager get_entity_manager();
 
