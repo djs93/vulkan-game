@@ -20,8 +20,6 @@ void run_entity(Entity_T* ent)
 		ent->prethink(ent);
 	}
 
-	slog("%s's movetype:%i", ent->name, ent->movetype);
-
 	switch ((int)ent->movetype)
 	{
 		case MOVETYPE_PUSH:
