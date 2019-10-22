@@ -132,3 +132,85 @@ Bool PointInOrientedRectangle(Point2D point, OrientedRectangle rectangle)
 	vector2d_add(localPoint, rotVector, rectangle.halfExtents);
 	return PointInRectangle(localPoint, localRectangle);
 }
+
+Bool LineCircle(Line2D line, Circle circle)
+{
+	Vector2D ab;
+	vector2d_sub(ab,line.end,line.start);
+	Vector2D dif;
+	vector2d_sub(dif, circle.position, line.start);
+	float t = vector2d_dot_product(dif, ab) / vector2d_dot_product(ab, ab);
+	if (t < 0.0f || t > 1.0f) {
+		return false;
+	}
+
+	Point2D closestPoint;
+	Vector2D scale;
+	vector2d_scale(scale, ab, t);
+	vector2d_add(closestPoint, line.start, scale);
+
+	Line2D circleToClosest = line2d(circle.position, closestPoint);
+	return LengthSq(circleToClosest) < circle.radius * circle.radius;
+}
+
+Bool LineRectangle(Line2D l, Rectangle2D r)
+{
+	if (PointInRectangle(l.start, r) ||
+		PointInRectangle(l.end, r)) {
+		return true;
+	}
+
+	Vector2D norm;
+	vector2d_sub(norm, l.end, l.start);
+	vector2d_normalize(&norm);
+	norm.x = (norm.x != 0) ? 1.0f / norm.x : 0;
+	norm.y = (norm.y != 0) ? 1.0f / norm.y : 0;
+	Vector2D min;
+	vector2d_sub(min, GetMin(r), l.start);
+	vector2d_multiply(&min, min, norm);
+	Vector2D max;
+	vector2d_sub(max, GetMax(r), l.start);
+	vector2d_multiply(&max, max, norm);
+
+	float tmin = fmaxf(
+		fminf(min.x, max.x),
+		fminf(min.y, max.y)
+	);
+	float tmax = fminf(
+		fmaxf(min.x, max.x),
+		fmaxf(min.y, max.y)
+	);
+	if (tmax< 0 || tmin>tmax) {
+		return false;
+	}
+	float t = (tmin < 0.0f) ? tmax : tmin;
+	return t > 0.0f && t * t < LengthSq(l);
+}
+
+Bool LineOrientedRectangle(Line2D line, OrientedRectangle rectangle)
+{
+	float theta = -DEG2RAD*(rectangle.rotation);
+	float zRotation2x2[] = {
+	   cosf(theta), sinf(theta),
+	   -sinf(theta), cosf(theta)
+	};
+	Line2D localLine;
+
+	Vector2D rotVector;
+	vector2d_sub(rotVector, line.start, rectangle.position);
+	Multiply(rotVector.asArray,
+		vector2d(rotVector.x, rotVector.y).asArray,
+		1, 2, zRotation2x2, 2, 2);
+	vector2d_add(localLine.start,rotVector, rectangle.halfExtents);
+
+	vector2d_sub(rotVector, line.end, rectangle.position);
+	Multiply(rotVector.asArray,
+		vector2d(rotVector.x, rotVector.y).asArray,
+		1, 2, zRotation2x2, 2, 2);
+	vector2d_add(localLine.end, rotVector, rectangle.halfExtents);
+
+	Vector2D size;
+	vector2d_scale(size, rectangle.halfExtents, 2.0f);
+	Rectangle2D localRectangle = rectangle2d(point2d_zero(), size);
+	return LineRectangle(localLine, localRectangle);
+}

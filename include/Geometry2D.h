@@ -104,4 +104,33 @@ Bool PointInRectangle(Point2D point, Rectangle2D rectangle);
 */
 Bool PointInOrientedRectangle(Point2D point, OrientedRectangle rectangle);
 
+/**
+* @brief find the closest point of the provided line to the center of the circle then checks if that point is inside the circle
+* @param line the line to check
+* @param circle the circle to check if the line has a point in
+* @return true if line has point in circle, false otherwise
+*/
+Bool LineCircle(Line2D line, Circle circle);
+
+/**
+* @brief test if a line is interesting or contained within a rectangle
+* @param l the line to check
+* @param r the rectangle to check if the line has a point in
+* @return true if line has point in rectangle, false otherwise
+*/
+Bool LineRectangle(Line2D l, Rectangle2D r);
+
+/**
+* @brief test if a line is interesting or contained within an oriented rectangle
+* @param l the line to check
+* @param r the oriented rectangle to check if the line has a point in
+* @return true if line has point in rectangle, false otherwise
+*/
+Bool LineOrientedRectangle(Line2D line, OrientedRectangle rectangle);
+
+#define PointLine(point, line) PointOnLine(point, line)
+#define LinePoint(line, point) PointOnLine(point, line)
+#define CircleLine(circle, line) LineCircle(line, circle)
+#define RectangleLine(rectangle, line) LineRectangle(line, rectangle);
+#define OrientedRectangleLine(rectangle, line) LineOrientedRectangle(line, rectangle);
 #endif
