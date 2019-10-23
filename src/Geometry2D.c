@@ -26,13 +26,13 @@ Line2D line2d(Point2D start, Point2D end) {
 	return line;
 }
 
-float Length(Line2D line) {
+float LengthLine2D(Line2D line) {
 	Point2D vec;
 	vector2d_sub(vec, line.end, line.start);
 	return vector2d_magnitude(vec);
 }
 
-float LengthSq(Line2D line) {
+float LengthSqLine2D(Line2D line) {
 	Point2D vec;
 	vector2d_sub(vec, line.end, line.start);
 	return vector2d_magnitude_squared(vec);
@@ -52,7 +52,7 @@ Rectangle2D rectangle2d(Point2D origin, Vector2D size) {
 	return rect;
 }
 
-Vector2D GetMin(Rectangle2D rect) {
+Vector2D GetMinRect(Rectangle2D rect) {
 	Vector2D p1 = rect.origin;
 	Vector2D p2;
 	vector2d_add(p2,rect.origin,rect.size);
@@ -60,7 +60,7 @@ Vector2D GetMin(Rectangle2D rect) {
 	return vector2d(fminf(p1.x, p2.x), fminf(p1.y, p2.y));
 }
 
-Vector2D GetMax(Rectangle2D rect) {
+Vector2D GetMaxRect(Rectangle2D rect) {
 	Vector2D p1 = rect.origin;
 	Vector2D p2;
 	vector2d_add(p2,rect.origin,rect.size);
@@ -68,7 +68,7 @@ Vector2D GetMax(Rectangle2D rect) {
 	return vector2d(fmaxf(p1.x, p2.x), fmaxf(p1.y, p2.y));
 }
 
-Rectangle2D FromMinMax(Vector2D min, Vector2D max) {
+Rectangle2D FromMinMaxRect(Vector2D min, Vector2D max) {
 	Vector2D vec;
 	vector2d_sub(vec, max, min);
 	return rectangle2d(min, vec);
@@ -98,7 +98,7 @@ Bool PointOnLine(Point2D point, Line2D line)
 Bool PointInCircle(Point2D point, Circle c)
 {
 	Line2D line = line2d(point, c.position);
-	if (LengthSq(line) < c.radius * c.radius) {
+	if (LengthSqLine2D(line) < c.radius * c.radius) {
 		return true;
 	}
 	return false;
@@ -106,8 +106,8 @@ Bool PointInCircle(Point2D point, Circle c)
 
 Bool PointInRectangle(Point2D point, Rectangle2D rectangle)
 {
-	Vector2D min = GetMin(rectangle);
-	Vector2D max = GetMax(rectangle);
+	Vector2D min = GetMinRect(rectangle);
+	Vector2D max = GetMaxRect(rectangle);
 
 	return  min.x <= point.x &&	min.y <= point.y &&	point.x <= max.x &&	point.y <= max.y;
 }
@@ -150,7 +150,7 @@ Bool LineCircle(Line2D line, Circle circle)
 	vector2d_add(closestPoint, line.start, scale);
 
 	Line2D circleToClosest = line2d(circle.position, closestPoint);
-	return LengthSq(circleToClosest) < circle.radius * circle.radius;
+	return LengthSqLine2D(circleToClosest) < circle.radius * circle.radius;
 }
 
 Bool LineRectangle(Line2D l, Rectangle2D r)
@@ -166,10 +166,10 @@ Bool LineRectangle(Line2D l, Rectangle2D r)
 	norm.x = (norm.x != 0) ? 1.0f / norm.x : 0;
 	norm.y = (norm.y != 0) ? 1.0f / norm.y : 0;
 	Vector2D min;
-	vector2d_sub(min, GetMin(r), l.start);
+	vector2d_sub(min, GetMinRect(r), l.start);
 	vector2d_multiply(&min, min, norm);
 	Vector2D max;
-	vector2d_sub(max, GetMax(r), l.start);
+	vector2d_sub(max, GetMaxRect(r), l.start);
 	vector2d_multiply(&max, max, norm);
 
 	float tmin = fmaxf(
@@ -184,7 +184,7 @@ Bool LineRectangle(Line2D l, Rectangle2D r)
 		return false;
 	}
 	float t = (tmin < 0.0f) ? tmax : tmin;
-	return t > 0.0f && t * t < LengthSq(l);
+	return t > 0.0f && t * t < LengthSqLine2D(l);
 }
 
 Bool LineOrientedRectangle(Line2D line, OrientedRectangle rectangle)

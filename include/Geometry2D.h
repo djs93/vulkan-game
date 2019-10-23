@@ -26,8 +26,8 @@ Point2D point2d(float x, float y);
 
 Point2D point2d_zero();
 
-float Length(Line2D line);
-float LengthSq(Line2D line);
+float LengthLine2D(Line2D line);
+float LengthSqLine2D(Line2D line);
 
 typedef struct Circle {
 	Point2D position;
@@ -53,10 +53,10 @@ typedef struct Rectangle2D {
  */
 Rectangle2D rectangle2d(Point2D origin, Vector2D size);
 
-Vector2D GetMin(Rectangle2D rect);
-Vector2D GetMax(Rectangle2D rect);
+Vector2D GetMinRect(Rectangle2D rect);
+Vector2D GetMaxRect(Rectangle2D rect);
 
-Rectangle2D FromMinMax (Vector2D min, Vector2D max);
+Rectangle2D FromMinMaxRect (Vector2D min, Vector2D max);
 
 typedef struct OrientedRectangle {
 	Point2D position;
