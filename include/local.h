@@ -2,7 +2,7 @@
 #ifndef __LOCAL_H__
 #define __LOCAL_H__
 
-#define FRAMETIME 0.1
+#define FRAMETIME 0.0001
 
 #define FL_FLY 0x00000001
 #define FLT_EPSILON 1.192092896e-07F 

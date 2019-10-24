@@ -37,8 +37,11 @@ Entity_T *gf3d_entity_new()
         if (entity_list[i]._inuse)continue;
         //. found a free entity
         memset(&entity_list[i],0,sizeof(Entity_T));
-        entity_list[i]._inuse = 1;
+		ent = &entity_list[i];
+        ent->_inuse = 1;
 		gf3d_entity_manager.num_ents++;
+		ent->movetype = MOVETYPE_NONE;
+		ent->touch = NULL;
         return &entity_list[i];
     }
     slog("request for entity failed: all full up");

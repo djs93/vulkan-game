@@ -3,6 +3,7 @@
 
 #include "gf3d_model.h"
 #include "local.h"
+#include "Geometry3D.h"
 
 typedef enum
 {
@@ -40,6 +41,9 @@ typedef struct Entity_S
 
 	int flags;
 	int svflags;
+
+	AABB boundingBox;
+	float gravity;
     void *data;                     /**<additional entity specific data*/
     
 }Entity;

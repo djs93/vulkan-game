@@ -6,6 +6,9 @@
 
 #include "gfc_vector.h"
 #include "gfc_matrix.h"
+#include "gf3d_mesh.h"
+#include "gf3d_model.h"
+#include "local.h"
 #define FLT_EPSILON 1.192092896e-07F 
 
 typedef Vector3D Point3D;
@@ -110,6 +113,7 @@ typedef struct Triangle {
 	};
 } Triangle;
 
+/**
 typedef struct BVHNode {
 	AABB bounds;
 	struct BVHNode* children;
@@ -117,7 +121,8 @@ typedef struct BVHNode {
 	int* triangles;
 
 } BVHNode;
-
+*/
+/**
 typedef struct Mesh {
 	int numTriangles;
 	union {
@@ -128,7 +133,8 @@ typedef struct Mesh {
 	BVHNode* accelerator;
 
 } Mesh;
-
+*/
+/**
 typedef struct Model {
 	Mesh* content;
 	AABB bounds;
@@ -137,6 +143,7 @@ typedef struct Model {
 	Bool flag;
 	struct Model* parent;
 } Model;
+*/
 
 typedef struct Frustum {
 	union {
@@ -157,6 +164,7 @@ typedef struct RaycastResult {
 	Vector3D normal;
 	float t;
 	Bool hit;
+	Entity_T* ent;
 } RaycastResult;
 
 typedef struct Interval {
@@ -232,7 +240,7 @@ Bool PlanePlane(Plane plane1, Plane plane2);
 * @param ray the ray to test intersection on sphere
 * @return the time t it takes the ray to hit the sphere, -1 if it didn't hit
 */
-float RaycastSphere(Sphere sphere, Ray ray);
+Bool RaycastSphere(Sphere sphere, Ray ray, RaycastResult* outResult);
 
 /**
 * @brief raycast to an Axis-Aligned Bounding Box
@@ -304,8 +312,8 @@ Vector3D SatCrossEdge(Vector3D a, Vector3D b, Vector3D c, Vector3D d);
 Vector3D Barycentric(Point3D p, Triangle t);
 
 void AccelerateMesh(Mesh mesh);
-void SplitBVHNode(BVHNode* node, Mesh model, int depth);
-void FreeBVHNode(BVHNode* node);
+//void SplitBVHNode(BVHNode* node, Mesh model, int depth);
+//void FreeBVHNode(BVHNode* node);
 
 Bool Linetest(Mesh mesh, Line3D line);
 Bool MeshSphere(Mesh mesh, Sphere sphere);

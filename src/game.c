@@ -33,6 +33,7 @@ int main(int argc,char *argv[])
     Matrix4 modelMat2;
 	Model *model3;
 	Vector3D testvec = vector3d(1.f, 0.f, 0.f);
+	SDL_Event event;
 
     
     for (a = 1; a < argc;a++)
@@ -78,28 +79,59 @@ int main(int argc,char *argv[])
     ent1->model = model;
 	ent1->name = "Ezreal1";
 	ent1->movetype = MOVETYPE_STEP;
+	ent1->velocity = vector3d(20, 0, 0);
 	slog("Entities now: %i", gf3d_entity_manager.num_ents);
 	gfc_matrix_identity(modelMat);
 	gfc_matrix_copy(ent1->modelMat, modelMat);
+	gfc_matrix_rotate(ent1->modelMat, ent1->modelMat, 3.14f, vector3d(0,0,1));
 	//ent1->modelMat = modelMat;
-	Entity_T* ent2 = gf3d_entity_new();
-	ent2->model = model2;
-	ent2->name = "Ezreal2";
-	ent2->movetype = MOVETYPE_STEP;
-	gfc_matrix_identity(modelMat2);
-	gfc_matrix_copy(ent2->modelMat, modelMat2);
+	//Entity_T* ent2 = gf3d_entity_new();
+	//ent2->model = model2;
+	//ent2->name = "Ezreal2";
+	//ent2->movetype = MOVETYPE_STEP;
+	//gfc_matrix_identity(modelMat2);
+	//gfc_matrix_copy(ent2->modelMat, modelMat2);
 	//ent2->modelMat = modelMat2;
-    gfc_matrix_make_translation(
-		ent2->modelMat,
-            vector3d(10,0,0)
-        );
+    //gfc_matrix_make_translation(
+	//	ent2->modelMat,
+     //       vector3d(10,0,0)
+     //   );
 	#pragma endregion
-	float x, y, z = 0.;
+	float x, y, z, m = 0.;
 	Vector3D forward;
     while(!done)
     {
+		slog("%f", ent1->velocity.x);
         SDL_PumpEvents();   // update SDL's internal event structures
-        keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
+		while (SDL_PollEvent(&event)) {
+			switch (event.type) {
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.scancode) {
+						case(SDL_SCANCODE_D):
+							ent1->acceleration = vector3d(10, 0, 0);
+							break;
+						case(SDL_SCANCODE_A):
+							ent1->acceleration = vector3d(-10, 0, 0);
+							break;
+						default:
+							break;
+					}
+					break;
+				case SDL_KEYUP:
+					switch (event.key.keysym.scancode) {
+					case(SDL_SCANCODE_D):
+					case(SDL_SCANCODE_A):
+						ent1->acceleration = vector3d(0, 0, 0);
+						break;
+					default:
+						break;
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
         //update game things here
         
 		//Update physics for each entity
@@ -126,6 +158,7 @@ int main(int argc,char *argv[])
 		if (keys[SDL_SCANCODE_Z]) {
 			rotate_entity(ent1, 0.02, vector3d(0, 0, 1));
 		}
+		/**
 		if (keys[SDL_SCANCODE_L]) {
 			float sy = sqrt(pow(ent1->modelMat[0][0], 2) + pow(ent1->modelMat[1][0], 2));
 			
@@ -147,15 +180,37 @@ int main(int argc,char *argv[])
 			gfc_matrix_identity(ent1->modelMat);
 			gfc_matrix_identity(ent2->modelMat);
 		}
+		*/
 		if (keys[SDL_SCANCODE_KP_PERIOD]) {
-			slog("\nx:%f\ny:%f\nz:%f", x, y, z);
-			//gfc_matrix_slog(ent1->modelMat);
+			//slog("\nx:%f\ny:%f\nz:%f", x, y, z);
+			gfc_matrix_slog(ent1->modelMat);
 			//slog("\nx:%f\ny:%f\nz:%f", forward.x, forward.y, forward.z);
 		}
-
+		/**
+		if (keys[SDL_SCANCODE_D]) {
+			//gfc_matrix_make_translation(ent1->modelMat, vector3d(m, 0, 0));
+			//m++;
+			ent1->acceleration = vector3d(10,0,0);
+		}
+		if (!keys[SDL_SCANCODE_D] && !vector3d_equal(ent1->acceleration, vector3d(0, 0, 0))) {
+			ent1->acceleration = vector3d(0, 0, 0);
+		}
+		
+		if (keys[SDL_SCANCODE_A]) {
+			//gfc_matrix_make_translation(ent1->modelMat, vector3d(m, 0, 0));
+			//m++;
+			ent1->acceleration = vector3d(-10,0,0);
+		}
+		if (!keys[SDL_SCANCODE_A] && !vector3d_equal(ent1->acceleration, vector3d(0, 0, 0))) {
+			ent1->acceleration = vector3d(0, 0, 0);
+		}
+		*/
+		update_physics_positions();
+		/**
 		for (int i = 0; i < gf3d_entity_manager.entity_max; i++) {
 			run_entity(&entity_list[i]);
 		}
+		*/
 
 		//Multiplied each default speed by a factor of 10 because it was moving too slowly (Dale)
         //gf3d_vgraphics_rotate_camera(0.01);
@@ -169,7 +224,7 @@ int main(int argc,char *argv[])
             commandBuffer = gf3d_command_rendering_begin(bufferFrame);
 				//Make a "draw entities" function that does all this for each entity
                 gf3d_model_draw(ent1->model,bufferFrame,commandBuffer, ent1->modelMat);
-                gf3d_model_draw(ent2->model,bufferFrame,commandBuffer, ent2->modelMat);
+                //gf3d_model_draw(ent2->model,bufferFrame,commandBuffer, ent2->modelMat);
                 
             gf3d_command_rendering_end(commandBuffer);
             

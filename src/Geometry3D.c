@@ -548,7 +548,7 @@ Bool PlanePlane(Plane plane1, Plane plane2)
 	return !CMP(vector3d_dot_product(d, d), 0);
 }
 
-float RaycastSphere(Sphere sphere, Ray ray)
+Bool RaycastSphere(Sphere sphere, Ray ray, RaycastResult* outResult)
 {
 	Vector3D e;
 	vector3d_sub(e,sphere.position, ray.origin);
@@ -557,17 +557,33 @@ float RaycastSphere(Sphere sphere, Ray ray)
 	// ray.direction is assumed to be normalized
 	float a = vector3d_dot_product(e, ray.direction);
 	float bSq = eSq - (a * a);
-	float f = sqrt(rSq - bSq);
+	float f = sqrt(fabsf((rSq)- bSq));
+	
+	// Assume normal intersection!
+	float t = a - f;
+
 	// No collision has happened
-	if (rSq - (eSq - (a * a)) < 0.0f) {
-		return -1; // -1 is invalid.
+	if (rSq - (eSq - a * a) < 0.0f) {
+		return false;
 	}
 	// Ray starts inside the sphere
 	else if (eSq < rSq) {
-		return a + f; // Just reverse direction
+		// Just reverse direction
+		t = a + f;
 	}
-	// else Normal intersection
-	return a - f;
+	if (outResult != 0) {
+		outResult->t = t;
+		outResult->hit = true;
+		Vector3D point;
+		vector3d_scale(point, ray.direction, t);
+		vector3d_add(point, ray.origin, point);
+		outResult->point = point;
+		Vector3D norm;
+		vector3d_sub(norm, outResult->point, sphere.position);
+		vector3d_normalize(&norm);
+		outResult->normal = norm;
+	}
+	return true;
 }
 
 float RaycastAABB(AABB aabbox, Ray ray)
