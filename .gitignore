@@ -58,3 +58,8 @@ gf3d
 
 Debug/
 Release/
+
+shaders/News/
+
+*Copy.sln
+*.suo
