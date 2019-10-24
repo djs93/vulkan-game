@@ -265,6 +265,9 @@ Mesh *gf3d_mesh_load(char *filename)
     }
     gf3d_mesh_create_vertex_buffer_from_vertices(mesh,obj->faceVertices,obj->face_vert_count,obj->outFace,obj->face_count);
 	mesh->extents = obj->extents;
+	mesh->extents.x *= 1.1f;
+	mesh->extents.y *= 1.1f;
+	mesh->extents.z *= 1.2f;
     gf3d_obj_free(obj);
     gfc_line_cpy(mesh->filename,filename);
     return mesh;

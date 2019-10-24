@@ -90,16 +90,18 @@ void physics_noclip(Entity_T* ent) {
 
 void physics_step(Entity_T* ent) {
 	float speed;
-	Vector3D tempAccel, tempVel, tempOrigin;
-	AABB tempBox;
-	Bool clipping = false;
+	Vector3D tempAccel, tempVel, tempOrigin, testOrigin;
+	AABB tempBox, testBox;
+	Bool clippingx =false,clippingy =false,clippingz = false, clipping = false;
 	Entity_T* other;
+	Vector3D temp;
 	int j = 0;
 	//Set velocity
 	if (vector3d_equal(ent->acceleration, vector3d(0.0f, 0.0f, 0.0f))) {
 		//decelerate v towards stop
 		ent->velocity.x *= 0.98f;
 		ent->velocity.y *= 0.98f;
+		ent->velocity.z -= 9.81f;
 
 		speed = sqrt(ent->velocity.x * ent->velocity.x + ent->velocity.y * ent->velocity.y);
 		if (speed < 0.5f) {
@@ -113,7 +115,7 @@ void physics_step(Entity_T* ent) {
 		vector3d_add(ent->velocity, ent->velocity, tempAccel);
 		if (ent->movetype == MOVETYPE_STEP) { //apply gravity
 			if (!ent->groundentity) {
-				//ent->velocity.z -= 9.81f;
+				ent->velocity.z -= 9.81f;
 			}
 			else {
 				if (ent->velocity.z > 0.0f) {
@@ -139,28 +141,161 @@ void physics_step(Entity_T* ent) {
 			j++;
 			continue;
 		}
-		clipping = AABBAABB(ent->boundingBox, other->boundingBox);
+		clipping = AABBAABB(tempBox, other->boundingBox);
 		if (clipping) {
 			//if top of other is below bottom of entity, set groundentity
 			if ((other->position.z + other->boundingBox.size.z) < (ent->position.z - ent->boundingBox.size.z)) {
 				ent->groundentity = &other;
 			}
-			//Impact(&ent, &other);
+			//Test in x direction for clip
+			vector3d_set(testOrigin, tempOrigin.x, ent->boundingBox.position.y, ent->boundingBox.position.z);
+			testBox = aabb(testOrigin, ent->boundingBox.size);
+			clippingx = AABBAABB(testBox, other->boundingBox);
+			//Test in y direction for clip
+			vector3d_set(testOrigin, ent->boundingBox.position.x, tempOrigin.y, ent->boundingBox.position.z);
+			testBox = aabb(testOrigin, ent->boundingBox.size);
+			clippingy = AABBAABB(testBox, other->boundingBox);
+			//Test in z direction for clip
+			vector3d_set(testOrigin, ent->boundingBox.position.x, ent->boundingBox.position.y, tempOrigin.z);
+			testBox = aabb(testOrigin, ent->boundingBox.size);
+			clippingz = AABBAABB(testBox, other->boundingBox);
+			/**
+			vector3d_copy(temp, ent->boundingBox.position);
+			temp.x += ent->boundingBox.size.x;
+			if (RaycastAABB(other->boundingBox, ray(temp, vector3d(1, 0, 0))) >= 0.0f) {
+				ent->velocity.x = 0.0f;
+				clippingx = true;
+			}
+			else if (RaycastAABB(other->boundingBox, ray(temp, vector3d(-1, 0, 0))) >= 0.0f) {
+				ent->velocity.x = 0.0f;
+				clippingx = true;
+			}
+			temp.x -= ent->boundingBox.size.x * 2;
+			if (!clippingx && RaycastAABB(other->boundingBox, ray(temp, vector3d(1, 0, 0))) >= 0.0f) {
+				ent->velocity.x = 0.0f;
+				clippingx = true;
+			}
+			else if (!clippingx && RaycastAABB(other->boundingBox, ray(temp, vector3d(-1, 0, 0))) >= 0.0f) {
+				ent->velocity.x = 0.0f;
+				clippingx = true;
+			}
+			else if (!clippingx&& RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(1, 0, 0))) >= 0.0f) {
+				ent->velocity.x = 0.0f;
+				clippingx = true;
+			}
+			else if (RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(-1, 0, 0))) >= 0.0f) {
+				ent->velocity.x = 0.0f;
+				clippingx = true;
+			}
+
+			vector3d_copy(temp, ent->boundingBox.position);
+			temp.y += ent->boundingBox.size.y;
+			if (RaycastAABB(other->boundingBox, ray(temp, vector3d(0, 1, 0))) >= 0.0f) {
+				ent->velocity.y = 0.0f;
+				clippingy = true;
+			}
+			else if (RaycastAABB(other->boundingBox, ray(temp, vector3d(0, -1, 0))) >= 0.0f) {
+				ent->velocity.y = 0.0f;
+				clippingy = true;
+			}
+			temp.y -= ent->boundingBox.size.y * 2;
+			if (!clippingy && RaycastAABB(other->boundingBox, ray(temp, vector3d(0, 1, 0))) >= 0.0f) {
+				ent->velocity.y = 0.0f;
+				clippingy = true;
+			}
+			else if (!clippingy && RaycastAABB(other->boundingBox, ray(temp, vector3d(0, -1, 0))) >= 0.0f) {
+				ent->velocity.y = 0.0f;
+				clippingy = true;
+			}
+			else if (!clippingy && RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(0, 1, 0))) >= 0.0f) {
+				ent->velocity.y = 0.0f;
+				clippingy = true;
+			}
+			else if (RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(0, -1, 0))) >= 0.0f) {
+				ent->velocity.y = 0.0f;
+				clippingy = true;
+			}
+
+			vector3d_copy(temp, ent->boundingBox.position);
+			temp.z += ent->boundingBox.size.z;
+			if (RaycastAABB(other->boundingBox, ray(temp, vector3d(0, 0, 1))) >= 0.0f) {
+				ent->velocity.z = 0.0f;
+				clippingz = true;
+			}
+			else if (RaycastAABB(other->boundingBox, ray(temp, vector3d(0, 0, -1))) >= 0.0f) {
+				ent->velocity.z = 0.0f;
+				clippingz = true;
+			}
+			temp.z -= ent->boundingBox.size.z * 2;
+			if (!clippingz && RaycastAABB(other->boundingBox, ray(temp, vector3d(0, 0, 1))) >= 0.0f) {
+				ent->velocity.z = 0.0f;
+				clippingz = true;
+			}
+			else if (!clippingz && RaycastAABB(other->boundingBox, ray(temp, vector3d(0, 0, -1))) >= 0.0f) {
+				ent->velocity.z = 0.0f;
+				clippingz = true;
+			}
+			else if (!clippingz && RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(0, 0, 1))) >= 0.0f) {
+				ent->velocity.z = 0.0f;
+				clippingz = true;
+			}
+			else if (!clippingz && RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(0, 0, -1))) >= 0.0f) {
+				ent->velocity.z = 0.0f;
+				clippingz = true;
+			}
+			*/
+			Impact(&ent, &other);
 			//break;
 		}
 		j++;
 	}
 	//Verify not clipping
-	//MOVE THIS BACK INTO NOT CLIP CHECK ONCE BBOX SIZE IS FIXED
 	
-	if (!clipping) {
+	if (!clippingx) {
 		//Update position
-		vector3d_add(ent->position, ent->position, tempVel);
+		ent->position.x += tempVel.x;
+		//vector3d_add(ent->position, ent->position, tempVel);
 		//sync matrix and bbox positions
-		vector3d_copy(ent->boundingBox.position, ent->position);
+		ent->boundingBox.position.x = ent->position.x;
+		//vector3d_copy(ent->boundingBox.position, ent->position);
 		ent->modelMat[3][0] = ent->position.x;
+		//ent->modelMat[3][1] = ent->position.y;
+		//ent->modelMat[3][2] = ent->position.z;
+	}
+	else {
+		ent->velocity.x = 0.0f;
+	}
+	if (!clippingy) {
+		//Update position
+		ent->position.y += tempVel.y;
+		//vector3d_add(ent->position, ent->position, tempVel);
+		//sync matrix and bbox positions
+		ent->boundingBox.position.y = ent->position.y;
+		//vector3d_copy(ent->boundingBox.position, ent->position);
 		ent->modelMat[3][1] = ent->position.y;
+		//ent->modelMat[3][1] = ent->position.y;
+		//ent->modelMat[3][2] = ent->position.z;
+		if (clipping) {
+			slog("%f", RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(0, 1, 0))));
+			slog("%f", RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(0, -1, 0))));
+		}
+	}
+	else {
+		ent->velocity.y = 0.0f;
+	}
+	if (!clippingz) {
+		//Update position
+		ent->position.z += tempVel.z;
+		//vector3d_add(ent->position, ent->position, tempVel);
+		//sync matrix and bbox positions
+		ent->boundingBox.position.z = ent->position.z;
+		//vector3d_copy(ent->boundingBox.position, ent->position);
 		ent->modelMat[3][2] = ent->position.z;
+		//ent->modelMat[3][1] = ent->position.y;
+		//ent->modelMat[3][2] = ent->position.z;
+	}
+	else {
+		ent->velocity.z = 0.0f;
 	}
 	run_think(ent);
 }
@@ -341,9 +476,22 @@ void update_physics_positions() {
 
 void Impact(Entity_T* e1, Entity_T* e2)
 {
+	/**
 	if (e1->touch)
 		e1->touch(e1, e2);
 
 	if (e2->touch)
 		e2->touch(e2, e1);
+		*/
+	slog("%s touched %s", e1->name, e2->name);
+}
+
+void teleport_entity(Entity_T* ent, Vector3D distance)
+{
+	//matrix translate
+	gfc_matrix_make_translation(ent->modelMat,distance);
+	//position translate
+	vector3d_add(ent->position, ent->position, distance);
+	//bounding box translate
+	ent->boundingBox.position = ent->position;
 }

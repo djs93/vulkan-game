@@ -102,7 +102,7 @@ Model* gf3d_model_load_animated(char* filename, Uint32 startFrame, Uint32 endFra
 	{
 		snprintf(assetname, GFCLINELEN, "models/%s_%06i.obj", filename, startFrame + i);
 		model->mesh[i] = gf3d_mesh_load(assetname);
-		model->extents[i] = model->mesh[i]->extents;
+		model->extents[i] = &(model->mesh[i]->extents);
 	}
 
 	snprintf(assetname, GFCLINELEN, "images/%s.png", filename);
@@ -118,8 +118,11 @@ Model * gf3d_model_load(char * filename)
     model = gf3d_model_new();
     if (!model)return NULL;
     snprintf(assetname,GFCLINELEN,"models/%s.obj",filename);
+	model->frameCount = 1;
 	model->mesh = (Mesh * *)gfc_allocate_array(sizeof(Mesh*), 1);
+	model->extents = (Vector3D**)gfc_allocate_array(sizeof(Vector3D*), 1);
 	model->mesh[0] = gf3d_mesh_load(assetname);
+	model->extents[0] = &(model->mesh[0]->extents);
 
     snprintf(assetname,GFCLINELEN,"images/%s.png",filename);
     model->texture = gf3d_texture_load(assetname);

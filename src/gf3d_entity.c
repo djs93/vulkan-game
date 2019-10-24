@@ -83,6 +83,46 @@ EntityManager get_entity_manager() {
 	return gf3d_entity_manager;
 }
 
+Entity_T* modeled_entity_animated(char* modelName, char* entityName)
+{
+	Entity_T* ent = gf3d_entity_new();
+	if (!ent) {
+		return NULL;
+	}
+	Model* model = gf3d_model_load_animated(modelName, 0, 1);
+	if (!model) {
+		slog("Could not load animated model %s", modelName);
+		return NULL;
+	}
+	ent->model = model;
+	Matrix4 modelMat;
+	gfc_matrix_identity(modelMat);
+	gfc_matrix_copy(ent->modelMat, modelMat);
+	ent->boundingBox.size = *ent->model->extents[0];
+	ent->name = entityName;
+	return ent;
+}
+
+Entity_T* modeled_entity(char* modelName, char* entityName)
+{
+	Entity_T* ent = gf3d_entity_new();
+	if (!ent) {
+		return NULL;
+	}
+	Model* model = gf3d_model_load(modelName);
+	if (!model) {
+		slog("Could not load model %s", modelName);
+		return NULL;
+	}
+	ent->model = model;
+	Matrix4 modelMat;
+	gfc_matrix_identity(modelMat);
+	gfc_matrix_copy(ent->modelMat, modelMat);
+	ent->boundingBox.size = *ent->model->extents[0];
+	ent->name = entityName;
+	return ent;
+}
+
 void rotate_entity(Entity_T* entity, float radians, Vector3D axis) {
 	if (!entity->modelMat) {
 		slog("No model matrix for entity %s", entity->name);

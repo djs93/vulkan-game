@@ -85,4 +85,7 @@ EntityManager get_entity_manager();
 
 void rotate_entity(Entity* entity, float radians, Vector3D axis);
 
+Entity_T* modeled_entity_animated(char* modelName, char* entityName);
+Entity_T* modeled_entity(char* modelName, char* entityName);
+
 #endif

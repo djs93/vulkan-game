@@ -45,7 +45,7 @@ typedef struct
     VkBuffer                   *uniformBuffers;
     VkDeviceMemory             *uniformBuffersMemory;
     Uint32                      uniformBufferCount;
-	Vector3D** extents;
+	Vector3D**					extents;
 }Model;
 
 

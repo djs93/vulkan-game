@@ -16,6 +16,7 @@
 
 level_locals level;
 Entity_T* entity_list;
+void draw_entities();
 
 int main(int argc,char *argv[])
 {
@@ -29,10 +30,7 @@ int main(int argc,char *argv[])
     Uint32 bufferFrame = 0;
     VkCommandBuffer commandBuffer;
     Model *model;
-    Matrix4 modelMat;
     Model *model2;
-    Matrix4 modelMat2;
-	Model *model3;
 	Vector3D testvec = vector3d(1.f, 0.f, 0.f);
 	SDL_Event event;
 
@@ -73,38 +71,36 @@ int main(int argc,char *argv[])
 	// set up models
 	#pragma region set up models
 	//model = gf3d_model_load("ezreal");
-	model = gf3d_model_load_animated("ezreal",0,1);
-	model2 = gf3d_model_load_animated("ezreal", 0, 1);
-	model3 = gf3d_model_load("dino");
+	//model = gf3d_model_load_animated("ezreal",0,1);
+	//model2 = gf3d_model_load_animated("ezreal", 0, 1);
+	//model3 = gf3d_model_load("dino");
 	gf3d_entity_manager_init(ENTITY_MAX);
-	Entity_T* ent1 = gf3d_entity_new();
-    ent1->model = model;
-	ent1->name = "Ezreal1";
+	Entity_T* ent1 = modeled_entity_animated("ezreal", "Ezreal1");
+    //ent1->model = model;
+	//ent1->name = "Ezreal1";
 	ent1->movetype = MOVETYPE_STEP;
-	ent1->velocity = vector3d(20, 0, 0);
-	slog("Entities now: %i", gf3d_entity_manager.num_ents);
-	gfc_matrix_identity(modelMat);
-	gfc_matrix_copy(ent1->modelMat, modelMat);
+	//ent1->velocity = vector3d(20, 0, 0);
+	//slog("Entities now: %i", gf3d_entity_manager.num_ents);
+	//gfc_matrix_identity(modelMat);
+	//gfc_matrix_copy(ent1->modelMat, modelMat);
 	gfc_matrix_rotate(ent1->modelMat, ent1->modelMat, 3.14f, vector3d(0,0,1));
 	//ent1->modelMat = modelMat;
-	Entity_T* ent2 = gf3d_entity_new();
-	ent2->model = model2;
-	ent2->name = "Ezreal2";
+	Entity_T* ent2 = modeled_entity_animated("ezreal", "Ezreal2");
+	//ent2->model = model2;
+	//ent2->name = "Ezreal2";
 	ent2->movetype = MOVETYPE_STEP;
-	gfc_matrix_identity(modelMat2);
-	gfc_matrix_copy(ent2->modelMat, modelMat2);
+	//gfc_matrix_identity(modelMat2);
+	//gfc_matrix_copy(ent2->modelMat, modelMat2);
 	//ent2->modelMat = modelMat2;
-    gfc_matrix_make_translation(
-		ent2->modelMat,
-            vector3d(20,0,0)
-        );
-	ent2->position = vector3d(20, 0, 0);
+	Entity_T* ent3 = modeled_entity("ground", "ground");
+	teleport_entity(ent2, vector3d(20, 0, 0));
+	teleport_entity(ent3, vector3d(0, 0, -19));
 	#pragma endregion
 	float x, y, z, m = 0.;
 	Vector3D forward;
     while(!done)
     {
-		slog("%f", ent1->velocity.x);
+		//slog("%f", ent1->velocity.x);
         SDL_PumpEvents();   // update SDL's internal event structures
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -116,6 +112,12 @@ int main(int argc,char *argv[])
 						case(SDL_SCANCODE_A):
 							ent1->acceleration = vector3d(-10, 0, 0);
 							break;
+						case(SDL_SCANCODE_W):
+							ent1->acceleration = vector3d(0, 10, 0);
+							break;
+						case(SDL_SCANCODE_S):
+							ent1->acceleration = vector3d(0, -10, 0);
+							break;
 						default:
 							break;
 					}
@@ -124,6 +126,8 @@ int main(int argc,char *argv[])
 					switch (event.key.keysym.scancode) {
 					case(SDL_SCANCODE_D):
 					case(SDL_SCANCODE_A):
+					case(SDL_SCANCODE_W):
+					case(SDL_SCANCODE_S):
 						ent1->acceleration = vector3d(0, 0, 0);
 						break;
 					default:
@@ -226,23 +230,26 @@ int main(int argc,char *argv[])
         gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_pipeline(),bufferFrame);
             commandBuffer = gf3d_command_rendering_begin(bufferFrame);
 				//Make a "draw entities" function that does all this for each entity
-                gf3d_model_draw(ent1->model,bufferFrame,commandBuffer, ent1->modelMat, (Uint32)frame);
-                gf3d_model_draw(ent2->model,bufferFrame,commandBuffer, ent2->modelMat, (Uint32)frame);
+                //gf3d_model_draw(ent1->model,bufferFrame,commandBuffer, ent1->modelMat, 0);
+                //gf3d_model_draw(ent2->model,bufferFrame,commandBuffer, ent2->modelMat, 0);
+				
+				draw_entities(bufferFrame, commandBuffer, frame);
+				
 				frame = frame + 0.05;
 				if (frame >= 1)frame = 0;
 
-				ent1->boundingBox.size = *ent1->model->extents[(Uint32)frame];
-				ent2->boundingBox.size = *ent2->model->extents[(Uint32)frame];
+				//ent1->boundingBox.size = *ent1->model->extents[(Uint32)frame];
+				//ent2->boundingBox.size = *ent2->model->extents[(Uint32)frame];
 
-				slog("BB1 size x:%f, y:%f, z:%f", ent1->boundingBox.size.x, ent1->boundingBox.size.y, ent1->boundingBox.size.z);
-				slog("BB2 size x:%f, y:%f, z:%f", ent2->boundingBox.size.x, ent2->boundingBox.size.y, ent2->boundingBox.size.z);
+				//slog("BB1 size x:%f, y:%f, z:%f", ent1->boundingBox.size.x, ent1->boundingBox.size.y, ent1->boundingBox.size.z);
+				//slog("BB2 size x:%f, y:%f, z:%f", ent2->boundingBox.size.x, ent2->boundingBox.size.y, ent2->boundingBox.size.z);
 
             gf3d_command_rendering_end(commandBuffer);
             
         gf3d_vgraphics_render_end(bufferFrame);
 
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
-		if (keys[SDL_SCANCODE_SEMICOLON])ent1->model = model3;
+		//if (keys[SDL_SCANCODE_SEMICOLON])ent1->model = model3;
     }    
     
     vkDeviceWaitIdle(gf3d_vgraphics_get_default_logical_device());    
@@ -286,5 +293,24 @@ void RunFrame() {
 
 void TestThink(Entity_T* self) {
 	slog("My name is %s", self->name);
+}
+
+void draw_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, float frame) {
+	int i = 0;
+	Entity_T* ent;
+	while (i < gf3d_entity_manager.entity_max) {
+		ent = &entity_list[i];
+		if (ent->_inuse == 0) {
+			i++;
+			continue;
+		}
+
+		if (ent->model) {
+			gf3d_model_draw(ent->model, bufferFrame, commandBuffer, ent->modelMat, (Uint32)frame%ent->model->frameCount);
+			ent->boundingBox.size = *ent->model->extents[(Uint32)frame % ent->model->frameCount];
+		}
+
+		i++;
+	}
 }
 /*eol@eof*/

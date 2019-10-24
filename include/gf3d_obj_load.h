@@ -22,7 +22,7 @@ typedef struct
     
     Vertex *faceVertices;
     Uint32  face_vert_count;
-	Vector3D*	extents;
+	Vector3D	extents;
 }ObjData;
 
 /**
