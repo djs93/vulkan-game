@@ -76,6 +76,41 @@ Model * gf3d_model_new()
     return NULL;
 }
 
+Model* gf3d_model_load_animated(char* filename, Uint32 startFrame, Uint32 endFrame)
+{
+	TextLine assetname;
+	Model* model;
+	model = gf3d_model_new();
+	int i, count;
+	if (!model)return NULL;
+	count = endFrame - startFrame;
+	if (count <= 0)
+	{
+		gf3d_model_free(model);
+		slog("frameRange is zero or negative: %i", count);
+		return NULL;
+	}
+	model->frameCount = count;
+	model->mesh = (Mesh * *)gfc_allocate_array(sizeof(Mesh*), count);
+	model->extents = (Vector3D * *)gfc_allocate_array(sizeof(Vector3D*), count);
+	if (!model->mesh)
+	{
+		gf3d_model_free(model);
+		return NULL;
+	}
+	for (i = 0; i < count; i++)
+	{
+		snprintf(assetname, GFCLINELEN, "models/%s_%06i.obj", filename, startFrame + i);
+		model->mesh[i] = gf3d_mesh_load(assetname);
+		model->extents[i] = model->mesh[i]->extents;
+	}
+
+	snprintf(assetname, GFCLINELEN, "images/%s.png", filename);
+	model->texture = gf3d_texture_load(assetname);
+
+	return model;
+}
+
 Model * gf3d_model_load(char * filename)
 {
     TextLine assetname;
@@ -83,7 +118,8 @@ Model * gf3d_model_load(char * filename)
     model = gf3d_model_new();
     if (!model)return NULL;
     snprintf(assetname,GFCLINELEN,"models/%s.obj",filename);
-    model->mesh = gf3d_mesh_load(assetname);
+	model->mesh = (Mesh * *)gfc_allocate_array(sizeof(Mesh*), 1);
+	model->mesh[0] = gf3d_mesh_load(assetname);
 
     snprintf(assetname,GFCLINELEN,"images/%s.png",filename);
     model->texture = gf3d_texture_load(assetname);
@@ -107,11 +143,18 @@ void gf3d_model_delete(Model *model)
         vkFreeMemory(gf3d_model.device, model->uniformBuffersMemory[i], NULL);
     }
 
-    gf3d_mesh_free(model->mesh);
+	for (i = 0; i < model->frameCount; i++)
+	{
+		gf3d_mesh_free(model->mesh[i]);
+	}
+	if (model->mesh)
+	{
+		free(model->mesh);
+	}
     gf3d_texture_free(model->texture);
 }
 
-void gf3d_model_draw(Model *model,Uint32 bufferFrame, VkCommandBuffer commandBuffer,Matrix4 modelMat)
+void gf3d_model_draw(Model *model,Uint32 bufferFrame, VkCommandBuffer commandBuffer,Matrix4 modelMat, Uint32 frame)
 {
     VkDescriptorSet *descriptorSet = NULL;
     if (!model)
@@ -119,6 +162,11 @@ void gf3d_model_draw(Model *model,Uint32 bufferFrame, VkCommandBuffer commandBuf
         slog("cannot render a NULL model");
         return;
     }
+	if (frame >= model->frameCount)
+	{
+		slog("cannot render model frame %i, greater than frameCount", frame);
+		return;
+	}
     descriptorSet = gf3d_pipeline_get_descriptor_set(gf3d_model.pipe, bufferFrame);
     if (descriptorSet == NULL)
     {
@@ -126,7 +174,7 @@ void gf3d_model_draw(Model *model,Uint32 bufferFrame, VkCommandBuffer commandBuf
         return;
     }
     gf3d_model_update_basic_model_descriptor_set(model,*descriptorSet,bufferFrame,modelMat);
-    gf3d_mesh_render(model->mesh,commandBuffer,descriptorSet);
+	gf3d_mesh_render(model->mesh[frame], commandBuffer, descriptorSet);
 }
 
 void gf3d_model_update_basic_model_descriptor_set(Model *model,VkDescriptorSet descriptorSet,Uint32 chainIndex,Matrix4 modelMat)

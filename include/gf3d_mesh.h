@@ -28,6 +28,7 @@ typedef struct
     Uint32          faceCount;
     VkBuffer        faceBuffer;
     VkDeviceMemory  faceBufferMemory;
+	Vector3D		extents;
 }Mesh;
 
 /**

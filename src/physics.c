@@ -152,15 +152,15 @@ void physics_step(Entity_T* ent) {
 	}
 	//Verify not clipping
 	//MOVE THIS BACK INTO NOT CLIP CHECK ONCE BBOX SIZE IS FIXED
-	//Update position
-	vector3d_add(ent->position, ent->position, tempVel);
-	//sync matrix and bbox positions
-	vector3d_copy(ent->boundingBox.position, ent->position);
-	ent->modelMat[3][0] = ent->position.x;
-	ent->modelMat[3][1] = ent->position.y;
-	ent->modelMat[3][2] = ent->position.z;
+	
 	if (!clipping) {
-		
+		//Update position
+		vector3d_add(ent->position, ent->position, tempVel);
+		//sync matrix and bbox positions
+		vector3d_copy(ent->boundingBox.position, ent->position);
+		ent->modelMat[3][0] = ent->position.x;
+		ent->modelMat[3][1] = ent->position.y;
+		ent->modelMat[3][2] = ent->position.z;
 	}
 	run_think(ent);
 }

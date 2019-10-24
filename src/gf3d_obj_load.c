@@ -100,6 +100,8 @@ ObjData *gf3d_obj_load_from_file(char *filename)
     obj->faceVerts = (Face *)gfc_allocate_array(sizeof(Face),obj->face_count);
     obj->faceNormals = (Face *)gfc_allocate_array(sizeof(Face),obj->face_count);
     obj->faceTexels = (Face *)gfc_allocate_array(sizeof(Face),obj->face_count);
+
+	obj->extents = vector3d_new();
     
     gf3d_obj_load_get_data_from_file(obj, file);
     fclose(file);
@@ -188,8 +190,17 @@ void gf3d_obj_load_get_data_from_file(ObjData *obj, FILE* file)
                 &z
               );
             obj->vertices[numvertices].x = x;
+			if (abs(x) > obj->extents->x) {
+				obj->extents->x = abs(x);
+			}
             obj->vertices[numvertices].y = y;
+			if (abs(y) > obj->extents->y) {
+				obj->extents->y = abs(y);
+			}
             obj->vertices[numvertices].z = z;
+			if (abs(z) > obj->extents->z) {
+				obj->extents->z = abs(z);
+			}
             numvertices++;
             break;
           case 'n':
