@@ -17,6 +17,7 @@
 level_locals level;
 Entity_T* entity_list;
 void draw_entities();
+void sync_camera();
 
 int main(int argc,char *argv[])
 {
@@ -79,7 +80,7 @@ int main(int argc,char *argv[])
     //ent1->model = model;
 	//ent1->name = "Ezreal1";
 	ent1->movetype = MOVETYPE_STEP;
-	//ent1->velocity = vector3d(20, 0, 0);
+	ent1->velocity = vector3d(200, 0, 0);
 	//slog("Entities now: %i", gf3d_entity_manager.num_ents);
 	//gfc_matrix_identity(modelMat);
 	//gfc_matrix_copy(ent1->modelMat, modelMat);
@@ -93,8 +94,14 @@ int main(int argc,char *argv[])
 	//gfc_matrix_copy(ent2->modelMat, modelMat2);
 	//ent2->modelMat = modelMat2;
 	Entity_T* ent3 = modeled_entity("ground", "ground");
+	Entity_T* ent4 = modeled_entity("platform_one", "plat1");
+	Entity_T* ent5 = modeled_entity("platform_one", "plat2");
+	Entity_T* ent6 = modeled_entity("platform_one", "plat3");
 	teleport_entity(ent2, vector3d(20, 0, 0));
 	teleport_entity(ent3, vector3d(0, 0, -19));
+	teleport_entity(ent4, vector3d(40, 0, -10));
+	teleport_entity(ent5, vector3d(40, 20, 0));
+	teleport_entity(ent6, vector3d(40, 40, 10));
 	#pragma endregion
 	float x, y, z, m = 0.;
 	Vector3D forward;
@@ -107,16 +114,24 @@ int main(int argc,char *argv[])
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.scancode) {
 						case(SDL_SCANCODE_D):
-							ent1->acceleration = vector3d(10, 0, 0);
+							if (abs(ent1->acceleration.x - 10.0f) <= 10.0f) {
+								ent1->acceleration.x -= 10.0f;
+							}
 							break;
 						case(SDL_SCANCODE_A):
-							ent1->acceleration = vector3d(-10, 0, 0);
+							if (abs(ent1->acceleration.x + 10.0f) <= 10.0f) {
+								ent1->acceleration.x += 10.0f;
+							}
 							break;
 						case(SDL_SCANCODE_W):
-							ent1->acceleration = vector3d(0, 10, 0);
+							if (abs(ent1->acceleration.y - 10.0f) <= 10.0f) {
+								ent1->acceleration.y -= 10.0f;
+							}
 							break;
 						case(SDL_SCANCODE_S):
-							ent1->acceleration = vector3d(0, -10, 0);
+							if (abs(ent1->acceleration.y + 10.0f) <= 10.0f) {
+								ent1->acceleration.y += 10.0f;
+							}
 							break;
 						default:
 							break;
@@ -125,10 +140,24 @@ int main(int argc,char *argv[])
 				case SDL_KEYUP:
 					switch (event.key.keysym.scancode) {
 					case(SDL_SCANCODE_D):
+						if (abs(ent1->acceleration.x + 10.0f) <= 10.0f) {
+							ent1->acceleration.x += 10.0f;
+						}
+						break;
 					case(SDL_SCANCODE_A):
+						if (abs(ent1->acceleration.x - 10.0f) <= 10.0f) {
+							ent1->acceleration.x -= 10.0f;
+						}
+						break;
 					case(SDL_SCANCODE_W):
+						if (abs(ent1->acceleration.y + 10.0f) <= 10.0f) {
+							ent1->acceleration.y += 10.0f;
+						}
+						break;
 					case(SDL_SCANCODE_S):
-						ent1->acceleration = vector3d(0, 0, 0);
+						if (abs(ent1->acceleration.y - 10.0f) <= 10.0f) {
+							ent1->acceleration.y -= 10.0f;
+						}
 						break;
 					default:
 						break;
@@ -144,6 +173,17 @@ int main(int argc,char *argv[])
 		//Update physics for each entity
 		//vector4d_rotate(&ent1->rotation, 0.02, vector3d(0, 0, 1));
 		//vector3d_rotate_about_vector(&ent1->rotation, vector3d(0, 0, 1), ent1->rotation, 0.02);
+		if (keys[SDL_SCANCODE_D] && keys[SDL_SCANCODE_A]) {
+			ent1->acceleration.x = 0.0f;
+		}
+		if (keys[SDL_SCANCODE_W] && keys[SDL_SCANCODE_S]) {
+			ent1->acceleration.y = 0.0f;
+		}
+		if (keys[SDL_SCANCODE_SPACE]&& !(ent1->flags & FL_JUMPING)) {
+			ent1->velocity.z = 2000.0f;
+			int combo = ent1->flags | FL_JUMPING;
+			ent1->flags = combo;
+		}
 		if (keys[SDL_SCANCODE_RIGHT]) { 
 			rotate_entity(ent1, 0.02, vector3d(0, 0, 1));
 		}
@@ -234,6 +274,7 @@ int main(int argc,char *argv[])
                 //gf3d_model_draw(ent2->model,bufferFrame,commandBuffer, ent2->modelMat, 0);
 				
 				draw_entities(bufferFrame, commandBuffer, frame);
+				sync_camera(ent1);
 				
 				frame = frame + 0.05;
 				if (frame >= 1)frame = 0;
@@ -280,11 +321,11 @@ void RunFrame() {
 		if ((ent->groundentity) && (ent->groundentity->linkcount != ent->groundentity_linkcount))
 		{
 			ent->groundentity = NULL;
-			if (!(ent->flags & FL_FLY) && (ent->svflags & SVF_MONSTER))
-			{
-				//Implement later:
-				//M_CheckGround(ent);
-			}
+			//if (!(ent->flags & FL_FLY) && (ent->svflags & SVF_MONSTER))
+			//{
+			//	//Implement later:
+			//	//M_CheckGround(ent);
+			//}
 		}
 
 		run_entity(ent);
@@ -312,5 +353,11 @@ void draw_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, float fram
 
 		i++;
 	}
+}
+
+void sync_camera(Entity_T* ent) {
+	Vector3D pos;
+	vector3d_add(pos, ent->boundingBox.position, vector3d(5, 60, 15));
+	gf3d_vgraphics_set_camera_pos(pos, ent->boundingBox.position, vector3d(0,0,1));
 }
 /*eol@eof*/

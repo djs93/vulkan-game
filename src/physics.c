@@ -7,7 +7,7 @@
 
 // movement parameters
 float	pm_stopspeed = 100;
-float	pm_maxspeed = 300;
+float	pm_maxspeed = 1000;
 float	pm_duckspeed = 100;
 float	pm_accelerate = 10;
 float	pm_airaccelerate = 0;
@@ -99,9 +99,8 @@ void physics_step(Entity_T* ent) {
 	//Set velocity
 	if (vector3d_equal(ent->acceleration, vector3d(0.0f, 0.0f, 0.0f))) {
 		//decelerate v towards stop
-		ent->velocity.x *= 0.98f;
-		ent->velocity.y *= 0.98f;
-		ent->velocity.z -= 9.81f;
+		ent->velocity.x *= 0.96f;
+		ent->velocity.y *= 0.96f;
 
 		speed = sqrt(ent->velocity.x * ent->velocity.x + ent->velocity.y * ent->velocity.y);
 		if (speed < 0.5f) {
@@ -113,19 +112,30 @@ void physics_step(Entity_T* ent) {
 	else {
 		vector3d_copy(tempAccel, ent->acceleration);
 		vector3d_add(ent->velocity, ent->velocity, tempAccel);
-		if (ent->movetype == MOVETYPE_STEP) { //apply gravity
-			if (!ent->groundentity) {
-				ent->velocity.z -= 9.81f;
-			}
-			else {
-				if (ent->velocity.z > 0.0f) {
-					ent->groundentity = NULL;
-				}
-			}
+		if (ent->velocity.x < -pm_maxspeed) {
+			ent->velocity.x = -pm_maxspeed;
+		}
+		else if (ent->velocity.x > pm_maxspeed) {
+			ent->velocity.x = pm_maxspeed;
+		}
+		if (ent->velocity.y < -pm_maxspeed) {
+			ent->velocity.y = -pm_maxspeed;
+		}
+		else if (ent->velocity.y > pm_maxspeed) {
+			ent->velocity.y = pm_maxspeed;
+		}
+		if (ent->velocity.z < -pm_maxspeed) {
+			ent->velocity.z = -pm_maxspeed;
+		}
+		else if (ent->velocity.z > pm_maxspeed*10) {
+			ent->velocity.z = pm_maxspeed*10;
 		}
 	}
+	if (ent->movetype == MOVETYPE_STEP) { //apply gravity
+		ent->velocity.z -= 15.0f;		
+	}
 	if (vector3d_equal(ent->velocity, vector3d(0.0f, 0.0f, 0.0f))) {
-		return;
+		//return;
 	}
 	//Simulate move
 	vector3d_scale(tempVel, ent->velocity, FRAMETIME);
@@ -144,21 +154,29 @@ void physics_step(Entity_T* ent) {
 		clipping = AABBAABB(tempBox, other->boundingBox);
 		if (clipping) {
 			//if top of other is below bottom of entity, set groundentity
-			if ((other->position.z + other->boundingBox.size.z) < (ent->position.z - ent->boundingBox.size.z)) {
+			float otherZTop = other->position.z + other->boundingBox.size.z;
+			float entZBottom = ent->position.z - ent->boundingBox.size.z;
+			float distance = otherZTop - entZBottom;
+			if (!ent->groundentity && otherZTop < entZBottom && distance < 0.05f) {
 				ent->groundentity = &other;
+				slog("Ground entity now %s", other->name);
 			}
 			//Test in x direction for clip
 			vector3d_set(testOrigin, tempOrigin.x, ent->boundingBox.position.y, ent->boundingBox.position.z);
 			testBox = aabb(testOrigin, ent->boundingBox.size);
-			clippingx = AABBAABB(testBox, other->boundingBox);
+			clippingx = clippingx || AABBAABB(testBox, other->boundingBox);
+			//clippingx = clippingx && !(((other->boundingBox.position.x>ent->position.x && ent->velocity.x<0.0f) || (other->boundingBox.position.x < ent->position.x&& ent->velocity.x > 0.0f))); //if we're clipping in x but we're making a move to unclip allow it
 			//Test in y direction for clip
 			vector3d_set(testOrigin, ent->boundingBox.position.x, tempOrigin.y, ent->boundingBox.position.z);
 			testBox = aabb(testOrigin, ent->boundingBox.size);
-			clippingy = AABBAABB(testBox, other->boundingBox);
+			clippingy = clippingy || AABBAABB(testBox, other->boundingBox);
+			//clippingy = clippingy && !(((other->boundingBox.position.y > ent->position.y&& ent->velocity.y < 0.0f) || (other->boundingBox.position.y < ent->position.y && ent->velocity.y > 0.0f))); //if we're clipping in y but we're making a move to unclip allow it
 			//Test in z direction for clip
 			vector3d_set(testOrigin, ent->boundingBox.position.x, ent->boundingBox.position.y, tempOrigin.z);
 			testBox = aabb(testOrigin, ent->boundingBox.size);
-			clippingz = AABBAABB(testBox, other->boundingBox);
+			clippingz = clippingz || AABBAABB(testBox, other->boundingBox);
+			//clippingz = clippingz && !(((other->boundingBox.position.z > ent->position.z&& ent->velocity.z < 0.0f) || (other->boundingBox.position.z < ent->position.z && ent->velocity.z > 0.0f))); //if we're clipping in z but we're making a move to unclip allow it
+
 			/**
 			vector3d_copy(temp, ent->boundingBox.position);
 			temp.x += ent->boundingBox.size.x;
@@ -250,7 +268,6 @@ void physics_step(Entity_T* ent) {
 		j++;
 	}
 	//Verify not clipping
-	
 	if (!clippingx) {
 		//Update position
 		ent->position.x += tempVel.x;
@@ -276,8 +293,8 @@ void physics_step(Entity_T* ent) {
 		//ent->modelMat[3][1] = ent->position.y;
 		//ent->modelMat[3][2] = ent->position.z;
 		if (clipping) {
-			slog("%f", RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(0, 1, 0))));
-			slog("%f", RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(0, -1, 0))));
+			//slog("%f", RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(0, 1, 0))));
+			//slog("%f", RaycastAABB(other->boundingBox, ray(ent->boundingBox.position, vector3d(0, -1, 0))));
 		}
 	}
 	else {
@@ -293,9 +310,14 @@ void physics_step(Entity_T* ent) {
 		ent->modelMat[3][2] = ent->position.z;
 		//ent->modelMat[3][1] = ent->position.y;
 		//ent->modelMat[3][2] = ent->position.z;
+		if (ent->groundentity) { 
+			ent->groundentity = NULL; 
+		}
 	}
 	else {
 		ent->velocity.z = 0.0f;
+		int combo = ent->flags & ~FL_JUMPING;
+		ent->flags = combo;
 	}
 	run_think(ent);
 }
@@ -483,7 +505,7 @@ void Impact(Entity_T* e1, Entity_T* e2)
 	if (e2->touch)
 		e2->touch(e2, e1);
 		*/
-	slog("%s touched %s", e1->name, e2->name);
+	//slog("touch");
 }
 
 void teleport_entity(Entity_T* ent, Vector3D distance)

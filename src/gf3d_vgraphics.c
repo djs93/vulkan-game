@@ -118,7 +118,7 @@ void gf3d_vgraphics_init(
         45 * GFC_DEGTORAD,
         renderWidth/(float)renderHeight,
         0.1f,
-        100
+        1000
     );
     
     gf3d_vgraphics.ubo.proj[1][1] *= -1;
@@ -668,6 +668,16 @@ void gf3d_vgraphics_rotate_camera(float degrees)
         degrees,
         vector3d(0,0,1));
 
+}
+
+void gf3d_vgraphics_move_camera(Vector3D amount) {
+	gf3d_vgraphics.ubo.view[3][0] += amount.x;
+	gf3d_vgraphics.ubo.view[3][1] += amount.y;
+	gf3d_vgraphics.ubo.view[3][2] += amount.z;
+}
+
+void gf3d_vgraphics_set_camera_pos(Vector3D pos, Vector3D target, Vector3D up) {
+	gfc_matrix_view(gf3d_vgraphics.ubo.view, pos, target, up);
 }
 
 Pipeline *gf3d_vgraphics_get_graphics_pipeline()
