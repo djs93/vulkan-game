@@ -84,7 +84,7 @@ int main(int argc,char *argv[])
 	//slog("Entities now: %i", gf3d_entity_manager.num_ents);
 	//gfc_matrix_identity(modelMat);
 	//gfc_matrix_copy(ent1->modelMat, modelMat);
-	gfc_matrix_rotate(ent1->modelMat, ent1->modelMat, 3.14f, vector3d(0,0,1));
+	//gfc_matrix_rotate(ent1->modelMat, ent1->modelMat, 3.14f, vector3d(0,0,1));
 	//ent1->modelMat = modelMat;
 	Entity_T* ent2 = modeled_entity_animated("ezreal", "Ezreal2");
 	//ent2->model = model2;
@@ -99,9 +99,9 @@ int main(int argc,char *argv[])
 	Entity_T* ent6 = modeled_entity("platform_one", "plat3");
 	teleport_entity(ent2, vector3d(20, 0, 0));
 	teleport_entity(ent3, vector3d(0, 0, -19));
-	teleport_entity(ent4, vector3d(40, 0, -10));
-	teleport_entity(ent5, vector3d(40, 20, 0));
-	teleport_entity(ent6, vector3d(40, 40, 10));
+	teleport_entity(ent4, vector3d(20, -40, -10));
+	teleport_entity(ent5, vector3d(40, -40, 0));
+	teleport_entity(ent6, vector3d(60, -40, 10));
 	#pragma endregion
 	float x, y, z, m = 0.;
 	Vector3D forward;
