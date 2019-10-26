@@ -128,7 +128,6 @@ void rotate_entity(Entity_T* entity, float radians, Vector3D axis) {
 		slog("No model matrix for entity %s", entity->name);
 	}
 	gfc_matrix_rotate(entity->modelMat, entity->modelMat, radians, axis);
-	//vector3d_rotate_about_vector(&entity->rotation, axis, getAngles(entity->modelMat), radians);
 	vector3d_copy(entity->rotation,getAngles(entity->modelMat));
 }
 

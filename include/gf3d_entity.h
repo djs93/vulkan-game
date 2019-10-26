@@ -83,8 +83,6 @@ void    gf3d_entity_free(Entity_T *self);
 */
 Entity_T* find_entity(char* name);
 
-EntityManager get_entity_manager();
-
 void rotate_entity(Entity_T* entity, float radians, Vector3D axis);
 
 Entity_T* modeled_entity_animated(char* modelName, char* entityName, int startFrame, int numFrames);

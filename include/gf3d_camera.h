@@ -7,12 +7,12 @@
  * @brief get the current camera view
  * @param view output, the matrix provided will be populated with the current camera information
  */
-void gf3d_camera_get_view(Matrix4 view);
+void gf3d_camera_get_view(Matrix4* view);
 
 /**
  * @brief set the current camera based on the matrix provided
  */
-void gf3d_camera_set_view(Matrix4 view);
+void gf3d_camera_set_view(Matrix4* view);
 
 /**
  * @brief set the camera properties based on position and direction that the camera should be looking
