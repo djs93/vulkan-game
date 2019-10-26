@@ -26,8 +26,8 @@ typedef struct Entity_S
     EntityState     state;          /**<current state of the entity*/
     void (*prethink)(struct Entity_S* self);   /**<function called before entity think*/
     void (*think)(struct Entity_S* self);   /**<function called on entity think*/
-    void (*update)(struct Entity_S* self);   /**<function called on entity update*/
     void (*touch)(struct Entity_S* self,struct Entity_S* other);   /**<function called when an entity touches another*/
+    void (*die)(struct Entity_S* self);   /**<function called when an entity dies*/
     float           health;
     float           healthmax;
 	int movetype;					/**<type of movement*/
@@ -39,11 +39,13 @@ typedef struct Entity_S
 	int linkcount;
 	int groundentity_linkcount;
 
-	int flags;
+	Uint8 flags;
 	int svflags;
 
 	AABB boundingBox;
-	float gravity;
+	Vector3D maxspeed;
+
+	float specFloat1;		/**<used for jumpheight in player*/
     void *data;                     /**<additional entity specific data*/
     
 }Entity;
@@ -72,7 +74,7 @@ Entity *gf3d_entity_new();
  * @brief free an active entity
  * @param self the entity to free
  */
-void    gf3d_entity_free(Entity *self);
+void    gf3d_entity_free(Entity_T *self);
 
 /**
 * @brief get the index of the named entity
@@ -83,9 +85,9 @@ Entity_T* find_entity(char* name);
 
 EntityManager get_entity_manager();
 
-void rotate_entity(Entity* entity, float radians, Vector3D axis);
+void rotate_entity(Entity_T* entity, float radians, Vector3D axis);
 
-Entity_T* modeled_entity_animated(char* modelName, char* entityName);
+Entity_T* modeled_entity_animated(char* modelName, char* entityName, int startFrame, int numFrames);
 Entity_T* modeled_entity(char* modelName, char* entityName);
 
 #endif

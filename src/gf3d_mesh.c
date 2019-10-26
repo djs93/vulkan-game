@@ -267,7 +267,7 @@ Mesh *gf3d_mesh_load(char *filename)
 	mesh->extents = obj->extents;
 	mesh->extents.x *= 1.1f;
 	mesh->extents.y *= 1.1f;
-	mesh->extents.z *= 1.2f;
+	mesh->extents.z *= 1.15f;
     gf3d_obj_free(obj);
     gfc_line_cpy(mesh->filename,filename);
     return mesh;

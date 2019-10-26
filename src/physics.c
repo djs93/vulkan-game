@@ -97,6 +97,18 @@ void physics_step(Entity_T* ent) {
 	Vector3D temp;
 	int j = 0;
 	//Set velocity
+	if (ent->acceleration.x == 0.0f) {
+		ent->velocity.x *= 0.96f;
+		if (abs(ent->velocity.x) < 0.5f) {
+			ent->velocity.x = 0.0f;
+		}
+	}
+	if (ent->acceleration.y == 0.0f) {
+		ent->velocity.y *= 0.96f;
+		if (abs(ent->velocity.y) < 0.5f) {
+			ent->velocity.y = 0.0f;
+		}
+	}/**
 	if (vector3d_equal(ent->acceleration, vector3d(0.0f, 0.0f, 0.0f))) {
 		//decelerate v towards stop
 		ent->velocity.x *= 0.96f;
@@ -108,34 +120,34 @@ void physics_step(Entity_T* ent) {
 			ent->velocity.y = 0.0f;
 		}
 
-	}
-	else {
+	}*/
+	//else {
 		vector3d_copy(tempAccel, ent->acceleration);
 		vector3d_add(ent->velocity, ent->velocity, tempAccel);
-		if (ent->velocity.x < -pm_maxspeed) {
-			ent->velocity.x = -pm_maxspeed;
+		if (ent->velocity.x < -ent->maxspeed.x) {
+			ent->velocity.x = -ent->maxspeed.x;
 		}
-		else if (ent->velocity.x > pm_maxspeed) {
-			ent->velocity.x = pm_maxspeed;
+		else if (ent->velocity.x > ent->maxspeed.x) {
+			ent->velocity.x = ent->maxspeed.x;
 		}
-		if (ent->velocity.y < -pm_maxspeed) {
-			ent->velocity.y = -pm_maxspeed;
+		if (ent->velocity.y < -ent->maxspeed.y) {
+			ent->velocity.y = -ent->maxspeed.y;
 		}
-		else if (ent->velocity.y > pm_maxspeed) {
-			ent->velocity.y = pm_maxspeed;
+		else if (ent->velocity.y > ent->maxspeed.y) {
+			ent->velocity.y = ent->maxspeed.y;
 		}
-		if (ent->velocity.z < -pm_maxspeed) {
-			ent->velocity.z = -pm_maxspeed;
+		if (ent->velocity.z < -ent->maxspeed.z) {
+			ent->velocity.z = -ent->maxspeed.z;
 		}
-		else if (ent->velocity.z > pm_maxspeed*10) {
-			ent->velocity.z = pm_maxspeed*10;
+		else if (ent->velocity.z > ent->maxspeed.z) {
+			ent->velocity.z = ent->maxspeed.z;
 		}
-	}
+	//}
 	if (ent->movetype == MOVETYPE_STEP) { //apply gravity
 		ent->velocity.z -= 15.0f;		
 	}
 	if (vector3d_equal(ent->velocity, vector3d(0.0f, 0.0f, 0.0f))) {
-		//return;
+		j = gf3d_entity_manager.entity_max;
 	}
 	//Simulate move
 	vector3d_scale(tempVel, ent->velocity, FRAMETIME);
@@ -151,7 +163,7 @@ void physics_step(Entity_T* ent) {
 			j++;
 			continue;
 		}
-		clipping = AABBAABB(tempBox, other->boundingBox);
+		clipping = other->_inuse!=0&&AABBAABB(tempBox, other->boundingBox);
 		if (clipping) {
 			//if top of other is below bottom of entity, set groundentity
 			float otherZTop = other->position.z + other->boundingBox.size.z;
@@ -159,22 +171,24 @@ void physics_step(Entity_T* ent) {
 			float distance = otherZTop - entZBottom;
 			if (!ent->groundentity && otherZTop < entZBottom && distance < 0.05f) {
 				ent->groundentity = &other;
-				slog("Ground entity now %s", other->name);
+				if (ent == player) {
+					slog("Ground entity now %s", other->name);
+				}
 			}
 			//Test in x direction for clip
 			vector3d_set(testOrigin, tempOrigin.x, ent->boundingBox.position.y, ent->boundingBox.position.z);
 			testBox = aabb(testOrigin, ent->boundingBox.size);
-			clippingx = clippingx || AABBAABB(testBox, other->boundingBox);
+			clippingx = clippingx || (other->movetype != MOVETYPE_NOCLIP && AABBAABB(testBox, other->boundingBox));
 			//clippingx = clippingx && !(((other->boundingBox.position.x>ent->position.x && ent->velocity.x<0.0f) || (other->boundingBox.position.x < ent->position.x&& ent->velocity.x > 0.0f))); //if we're clipping in x but we're making a move to unclip allow it
 			//Test in y direction for clip
 			vector3d_set(testOrigin, ent->boundingBox.position.x, tempOrigin.y, ent->boundingBox.position.z);
 			testBox = aabb(testOrigin, ent->boundingBox.size);
-			clippingy = clippingy || AABBAABB(testBox, other->boundingBox);
+			clippingy = clippingy || (other->movetype != MOVETYPE_NOCLIP && AABBAABB(testBox, other->boundingBox));
 			//clippingy = clippingy && !(((other->boundingBox.position.y > ent->position.y&& ent->velocity.y < 0.0f) || (other->boundingBox.position.y < ent->position.y && ent->velocity.y > 0.0f))); //if we're clipping in y but we're making a move to unclip allow it
 			//Test in z direction for clip
 			vector3d_set(testOrigin, ent->boundingBox.position.x, ent->boundingBox.position.y, tempOrigin.z);
 			testBox = aabb(testOrigin, ent->boundingBox.size);
-			clippingz = clippingz || AABBAABB(testBox, other->boundingBox);
+			clippingz = clippingz || (other->movetype != MOVETYPE_NOCLIP && AABBAABB(testBox, other->boundingBox));
 			//clippingz = clippingz && !(((other->boundingBox.position.z > ent->position.z&& ent->velocity.z < 0.0f) || (other->boundingBox.position.z < ent->position.z && ent->velocity.z > 0.0f))); //if we're clipping in z but we're making a move to unclip allow it
 
 			/**
@@ -262,7 +276,7 @@ void physics_step(Entity_T* ent) {
 				clippingz = true;
 			}
 			*/
-			Impact(&ent, &other);
+			Impact(ent, other);
 			//break;
 		}
 		j++;
@@ -275,6 +289,9 @@ void physics_step(Entity_T* ent) {
 		//sync matrix and bbox positions
 		ent->boundingBox.position.x = ent->position.x;
 		//vector3d_copy(ent->boundingBox.position, ent->position);
+		if (ent == player) {
+			ent->boundingBox.position.x += 0.5f;
+		}
 		ent->modelMat[3][0] = ent->position.x;
 		//ent->modelMat[3][1] = ent->position.y;
 		//ent->modelMat[3][2] = ent->position.z;
@@ -306,6 +323,9 @@ void physics_step(Entity_T* ent) {
 		//vector3d_add(ent->position, ent->position, tempVel);
 		//sync matrix and bbox positions
 		ent->boundingBox.position.z = ent->position.z;
+		if (ent == player) {
+			ent->boundingBox.position.z += 1.5f;
+		}
 		//vector3d_copy(ent->boundingBox.position, ent->position);
 		ent->modelMat[3][2] = ent->position.z;
 		//ent->modelMat[3][1] = ent->position.y;
@@ -315,9 +335,12 @@ void physics_step(Entity_T* ent) {
 		}
 	}
 	else {
+		if (ent->velocity.z <= 0.0f) {
+
+			int combo = ent->flags & ~FL_JUMPING;
+			ent->flags = combo;
+		}
 		ent->velocity.z = 0.0f;
-		int combo = ent->flags & ~FL_JUMPING;
-		ent->flags = combo;
 	}
 	run_think(ent);
 }
@@ -486,7 +509,10 @@ void update_physics_positions() {
 			i++;
 			continue;
 		}
-		if (ent->movetype == MOVETYPE_NONE) {
+		if (ent->prethink) {
+			ent->prethink(ent);
+		}
+		if (ent->movetype == MOVETYPE_NONE || ent->movetype == MOVETYPE_NOCLIP) {
 			physics_none(ent);
 		}
 		else if (ent->movetype == MOVETYPE_STEP) {
@@ -498,22 +524,20 @@ void update_physics_positions() {
 
 void Impact(Entity_T* e1, Entity_T* e2)
 {
-	/**
 	if (e1->touch)
 		e1->touch(e1, e2);
 
 	if (e2->touch)
 		e2->touch(e2, e1);
-		*/
 	//slog("touch");
 }
 
-void teleport_entity(Entity_T* ent, Vector3D distance)
+void teleport_entity(Entity_T* ent, Vector3D position)
 {
 	//matrix translate
-	gfc_matrix_make_translation(ent->modelMat,distance);
+	gfc_matrix_make_translation(ent->modelMat,position);
 	//position translate
-	vector3d_add(ent->position, ent->position, distance);
+	vector3d_copy(ent->position, position);
 	//bounding box translate
 	ent->boundingBox.position = ent->position;
 }

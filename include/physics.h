@@ -23,5 +23,5 @@ void Accelerate(Entity_T* ent, Vector3D wishdir, float wishspeed, float accel);
 
 void Impact(Entity_T* e1, Entity_T* e2);
 
-void teleport_entity(Entity_T* ent, Vector3D distance);
+void teleport_entity(Entity_T* ent, Vector3D position);
 #endif

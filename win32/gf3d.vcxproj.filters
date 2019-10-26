@@ -120,6 +120,9 @@
     <ClInclude Include="..\include\Geometry3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\mob_methods.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\gfc\simple_json\src\simple_json.c">
@@ -222,6 +225,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Geometry3D.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mob_methods.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

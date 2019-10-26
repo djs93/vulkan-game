@@ -5,6 +5,7 @@
 #define FRAMETIME 0.0001
 
 #define FL_JUMPING 0x00000001
+#define FL_SPRINTING 0x00000010
 #define FLT_EPSILON 1.192092896e-07F 
 #define DEG2RAD 0.01745329251994329576923690768489f
 
@@ -42,6 +43,8 @@ typedef struct {
 } level_locals;
 
 extern level_locals level;
+
+extern Entity_T* player;
 
 #endif
 #pragma once

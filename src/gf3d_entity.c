@@ -6,7 +6,7 @@
 #include "gf3d_entity.h"
 
 
-
+Vector3D getAngles(Matrix4 mat);
 void gf3d_entity_manager_close()
 {
     if(entity_list != NULL)
@@ -83,13 +83,13 @@ EntityManager get_entity_manager() {
 	return gf3d_entity_manager;
 }
 
-Entity_T* modeled_entity_animated(char* modelName, char* entityName)
+Entity_T* modeled_entity_animated(char* modelName, char* entityName, int startFrame, int numFrames)
 {
 	Entity_T* ent = gf3d_entity_new();
 	if (!ent) {
 		return NULL;
 	}
-	Model* model = gf3d_model_load_animated(modelName, 0, 1);
+	Model* model = gf3d_model_load_animated(modelName, startFrame, numFrames);
 	if (!model) {
 		slog("Could not load animated model %s", modelName);
 		return NULL;
@@ -128,6 +128,26 @@ void rotate_entity(Entity_T* entity, float radians, Vector3D axis) {
 		slog("No model matrix for entity %s", entity->name);
 	}
 	gfc_matrix_rotate(entity->modelMat, entity->modelMat, radians, axis);
+	//vector3d_rotate_about_vector(&entity->rotation, axis, getAngles(entity->modelMat), radians);
+	vector3d_copy(entity->rotation,getAngles(entity->modelMat));
+}
+
+Vector3D getAngles(Matrix4 mat) {
+	Vector3D res;
+	float sy = sqrt(pow(mat[0][0], 2) + pow(mat[1][0], 2));
+
+	Bool singular = sy < 0.000001f;
+	if (!singular) {
+		res.x = atan2(mat[2][1], mat[2][2]) * GFC_RADTODEG;
+		res.y = atan2(-mat[2][0], sy) * GFC_RADTODEG;
+		res.z = atan2(mat[1][0], mat[0][0]) * GFC_RADTODEG;
+	}
+	else {
+		res.x = atan2(-mat[1][2], mat[1][1]) * GFC_RADTODEG;
+		res.y = atan2(-mat[2][0], sy) * GFC_RADTODEG;
+		res.z = 0;
+	}
+	return res;
 }
 
 
