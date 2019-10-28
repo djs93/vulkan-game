@@ -47,6 +47,7 @@ typedef struct Entity_S
 
 	float specFloat1;		/**<used for jumpheight in player*/
     void *data;                     /**<additional entity specific data*/
+    void *data2;                     /**<additional entity specific data*/
     
 }Entity;
 

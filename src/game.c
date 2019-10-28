@@ -80,17 +80,21 @@ int main(int argc,char *argv[])
 	ent1->movetype = MOVETYPE_STEP;
 	ent1->healthmax = 100.0f;
 	ent1->health = ent1->healthmax;
-	ent1->boundingBox.size.z *= 0.75f;
-	ent1->boundingBox.size.x *= 0.50f;
-	ent1->boundingBox.size.y *= 0.50f;
+	ent1->boundingBox.size.z *= 0.86f;
+	ent1->boundingBox.size.x *= 0.70f;
+	ent1->boundingBox.size.y *= 0.70f;
 	ent1->maxspeed = vector3d(1000.0f,1000.0f,10000.0f);
 	ent1->specFloat1 = 2000.0f;
+	ent1->think = player_think;
+	ent1->nextthink = 0.1f;
+	ent1->model->boudningAdjustment.z = 1.2f;
 
 	Entity_T* ent2 = modeled_entity_animated("ezreal", "Ezreal2", 0, 1);
 	ent2->movetype = MOVETYPE_STEP;
 	ent2->think = TestThink;
 	ent2->nextthink = 0.1f;
 	ent2->maxspeed = vector3d(0.0f, 0.0f, 10000.0f);
+	ent2->model->boudningAdjustment.z = -1.5f;
 
 	Entity_T* ent3 = modeled_entity("ground", "ground");
 	Entity_T* ent4 = modeled_entity("platform_one", "plat1");
@@ -131,6 +135,27 @@ int main(int argc,char *argv[])
 	speedup1->die = speed_up_die;
 	speedup1->healthmax = 1.0f;
 	speedup1->health = speedup1->healthmax;
+
+	Entity_T* pacer = modeled_entity_animated("penguin", "pacer", 0, 25);
+	pacer->model->boudningAdjustment.z = -0.75f;
+	pacer->movetype = MOVETYPE_STEP;
+	pacer->nextthink = 0.1f;
+	pacer->maxspeed = vector3d(900.0f, 900.0f, 10000.0f);
+	pacer->healthmax = 1.0f;
+	pacer->health = pacer->healthmax;
+
+	pacer->think = pacer_think;
+	pacer->nextthink = 0.1f;
+	pacer->touch = pacer_touch;
+	pacer->die = pacer_die;
+
+	Vector3D accelV3 = vector3d(10, 0, 0);
+	pacer->data2 = &accelV3;
+	pacer->acceleration = accelV3;
+	//teleport_entity(pacer, vector3d(60, 0, 0));
+	teleport_entity(pacer, vector3d(20, 20, 0));
+
+	rotate_entity(pacer, GFC_HALF_PI, vector3d(0, 0, 1));
 
 	#pragma endregion
 	float accel = 15.0f;
@@ -228,7 +253,6 @@ int main(int argc,char *argv[])
 		}
 		update_physics_positions();
 		check_death();
-
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool
         bufferFrame = gf3d_vgraphics_render_begin();

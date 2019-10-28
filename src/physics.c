@@ -93,11 +93,11 @@ void physics_step(Entity_T* ent) {
 		clipping = other->_inuse!=0&&AABBAABB(tempBox, other->boundingBox);
 		if (clipping) {
 			//if top of other is below bottom of entity, set groundentity
-			float otherZTop = other->position.z + other->boundingBox.size.z;
-			float entZBottom = ent->position.z - ent->boundingBox.size.z;
-			float distance = otherZTop - entZBottom;
-			if (!ent->groundentity && otherZTop < entZBottom && distance < 0.05f) {
-				ent->groundentity = &other;
+			float otherZTop = other->position.z;
+			float entZBottom = ent->position.z;
+			if (!ent->groundentity && otherZTop < entZBottom) {
+				ent->groundentity = other;
+				slog("Set GE %s for %s", other->name, ent->name);
 				if (ent == player) {
 					slog("Ground entity now %s", other->name);
 				}
@@ -148,11 +148,10 @@ void physics_step(Entity_T* ent) {
 		ent->position.z += tempVel.z;
 		//sync matrix and bbox positions
 		ent->boundingBox.position.z = ent->position.z;
-		if (ent == player) {
-			ent->boundingBox.position.z += 1.5f;
-		}
+		ent->boundingBox.position.z += ent->model->boudningAdjustment.z;
 		ent->modelMat[3][2] = ent->position.z;
 		if (ent->groundentity) { 
+			slog("Set GE NULL for %s", ent->name);
 			ent->groundentity = NULL; 
 		}
 	}

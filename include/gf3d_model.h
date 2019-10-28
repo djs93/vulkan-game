@@ -46,6 +46,7 @@ typedef struct
     VkDeviceMemory             *uniformBuffersMemory;
     Uint32                      uniformBufferCount;
 	Vector3D**					extents;
+	Vector3D					boudningAdjustment;
 }Model;
 
 
