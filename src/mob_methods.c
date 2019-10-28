@@ -108,11 +108,12 @@ void pacer_think(Entity_T* self) {
 	self->nextthink = 0.1f;
 }
 void pacer_touch(Entity_T* self, Entity_T* other) {
-	if (other == player) {
+	if (other == player) {//should move player-specifics away from bouncing so if the ent hits a wall it can bounce
 		slog("thouch");
 		if (other->boundingBox.position.z - other->boundingBox.size.z + 0.1f > self->boundingBox.position.z + self->boundingBox.size.z) {
 			self->health = 0.0f;
 			self->movetype = MOVETYPE_NONE;
+			other->velocity.z = player->specFloat1;
 			return;
 		}
 		float zRot = getAngles(self->modelMat).z;
@@ -164,4 +165,43 @@ void pacer_die(Entity_T* self) {
 
 void player_think(Entity_T* self) {
 	self->nextthink = 0.1f;
+}
+
+void jumper_think(Entity_T* self)
+{
+	//jump
+	if (!(self->flags & FL_JUMPING)) {
+		self->velocity.z = 1500.0f;
+		self->flags = self->flags | FL_JUMPING;
+		//rotate to face player when impacting ground
+	}
+	//set xy acceleration to point at player
+}
+
+void jumper_touch(Entity_T* self, Entity_T* other)
+{
+	//check for stomp
+	//jump off player else
+}
+
+void jumper_die(Entity_T* self)
+{
+	speed_up_die(self);
+}
+
+void circler_think(Entity_T* self)
+{
+	//rotate slightly
+	//change acceleration to point forward relative to ent
+}
+
+void circler_touch(Entity_T* self, Entity_T* other)
+{
+	//check for stomp
+	//reflect and circle again
+}
+
+void circler_die(Entity_T* self)
+{
+	speed_up_die(self);
 }
