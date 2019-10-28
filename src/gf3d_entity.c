@@ -6,7 +6,6 @@
 #include "gf3d_entity.h"
 
 
-Vector3D getAngles(Matrix4 mat);
 void gf3d_entity_manager_close()
 {
     if(entity_list != NULL)

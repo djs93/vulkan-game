@@ -109,13 +109,31 @@ void pacer_think(Entity_T* self) {
 }
 void pacer_touch(Entity_T* self, Entity_T* other) {
 	if (other == player) {
+		slog("thouch");
 		if (other->boundingBox.position.z - other->boundingBox.size.z + 0.1f > self->boundingBox.position.z + self->boundingBox.size.z) {
 			self->health = 0.0f;
 			self->movetype = MOVETYPE_NONE;
 			return;
 		}
+		float zRot = getAngles(self->modelMat).z;
+		if (self->acceleration.x != 0.0f) {
 		self->acceleration.x *= -1;
-		self->acceleration.y *= -1;
+			if (zRot <= 0.0f) {
+				self->velocity.x = -self->maxspeed.x;
+			}
+			else {
+				self->velocity.x = self->maxspeed.x;
+			}
+		}
+		if (self->acceleration.y != 0.0f) {
+		self->acceleration.y *= -1; 
+			if (zRot < 180.0f && zRot >= -180.0f) {
+				self->velocity.y = -self->maxspeed.y;
+			}
+			else {
+				self->velocity.y = self->maxspeed.y;
+			}
+		}
 		rotate_entity(self, GFC_PI, vector3d(0, 0, 1));
 	}
 	/**

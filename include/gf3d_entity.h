@@ -89,4 +89,6 @@ void rotate_entity(Entity_T* entity, float radians, Vector3D axis);
 Entity_T* modeled_entity_animated(char* modelName, char* entityName, int startFrame, int numFrames);
 Entity_T* modeled_entity(char* modelName, char* entityName);
 
+Vector3D getAngles(Matrix4 mat);
+
 #endif

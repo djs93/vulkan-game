@@ -203,7 +203,10 @@ void Impact(Entity_T* e1, Entity_T* e2)
 void teleport_entity(Entity_T* ent, Vector3D position)
 {
 	//matrix translate
-	gfc_matrix_make_translation(ent->modelMat,position);
+	ent->modelMat[3][0] = position.x;
+	ent->modelMat[3][1] = position.y;
+	ent->modelMat[3][2] = position.z;
+	//gfc_matrix_make_translation(ent->modelMat,position);
 	//position translate
 	vector3d_copy(ent->position, position);
 	//bounding box translate
