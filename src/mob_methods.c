@@ -145,6 +145,14 @@ void pacer_die(Entity_T* self) {
 }
 
 void player_think(Entity_T* self) {
+	//look where you're going
+	Vector3D xyVel = vector3d(self->velocity.x, self->velocity.y, 0.0f);
+	if (vector3d_magnitude(xyVel)>2.0f) {
+		Vector3D futurePoint;
+		vector3d_add(futurePoint, self->position, self->velocity);
+		look_towards(self, futurePoint);
+	}
+	
 	self->nextthink = 0.1f;
 }
 
@@ -156,12 +164,13 @@ void jumper_think(Entity_T* self)
 		self->flags = self->flags | FL_JUMPING;
 		//rotate to face player when impacting ground
 	}
-	look_towards(self, player);
+	look_towards(self, player->position);
 	//set xy acceleration to point at player
 	Vector3D forward;
 	vector3d_sub(forward, player->position, self->position);
 	vector3d_normalize(&forward);
 	vector3d_scale(forward, forward, 15.0f);
+	forward.z = 0;
 	vector3d_copy(self->acceleration, forward);
 	self->nextthink = 0.1f;
 }
@@ -177,7 +186,6 @@ void jumper_touch(Entity_T* self, Entity_T* other)
 		other->groundentity = NULL;
 		return;
 	}
-	//jump off player else
 }
 
 void jumper_die(Entity_T* self)
@@ -187,6 +195,38 @@ void jumper_die(Entity_T* self)
 
 void circler_think(Entity_T* self)
 {
+	//check if player is in range, if it is, chase. 
+	Vector2D pos1 = vector2d(self->position.x, self->position.y);
+	Vector2D pos2 = vector2d(player->position.x, player->position.y);
+	if (vector2d_distance_between_less_than(pos1, pos2, 35.0f)) {
+		look_towards(self, player->position);
+		Vector3D forward;
+		vector3d_sub(forward, player->position, self->position);
+		vector3d_normalize(&forward);
+		forward.z = 0;
+		vector3d_scale(forward, forward, 15.0f);
+		vector3d_copy(self->acceleration, forward);
+	}
+	else {
+		rotate_entity(self, 0.01f, vector3d(0, 0, 1));
+		//float angle = getAngles(self->modelMat).z;
+		//Vector3D forward = vector3d(0, -1, 0);
+		Vector3D angles = getAngles(self->modelMat);
+
+		Vector3D forward;
+		forward.x = -sin(angles.z);
+		forward.y = -cos(angles.z);
+		forward.z = 0.0f;
+		//vector3d_scale(angles, angles, GFC_RADTODEG);
+		//vector3d_angle_vectors(angles, &forward, NULL, NULL);
+		//vector3d_rotate_about_z(&forward, angle * GFC_RADTODEG);
+		vector3d_scale(forward, forward, 150.0f);
+		vector3d_copy(self->acceleration, forward); 
+		//Vector3D futurePoint;
+		//vector3d_add(futurePoint, self->position, self->velocity);
+		//look_towards(self, forward);
+	}
+	//else:
 	//rotate slightly
 	//change acceleration to point forward relative to ent
 	self->nextthink = 0.1f;
@@ -194,8 +234,14 @@ void circler_think(Entity_T* self)
 
 void circler_touch(Entity_T* self, Entity_T* other)
 {
-	//check for stomp
-	//reflect and circle again
+	if (other == player && other->boundingBox.position.z - other->boundingBox.size.z + 0.1f > self->boundingBox.position.z + self->boundingBox.size.z) {
+		self->health = 0.0f;
+		self->movetype = MOVETYPE_NOCLIP;
+		teleport_entity(other, vector3d(other->position.x, other->position.y, other->position.z + 1.5f));
+		other->velocity.z = other->specFloat1;
+		other->groundentity = NULL;
+		return;
+	}
 }
 
 void circler_die(Entity_T* self)
@@ -203,9 +249,9 @@ void circler_die(Entity_T* self)
 	speed_up_die(self);
 }
 
-void look_towards(Entity_T* self, Entity_T* target) {
+void look_towards(Entity_T* self, Vector3D target) {
 	Vector3D pos1 = vector3d(self->position.x, self->position.y, 0);
-	Vector3D pos2 = vector3d(target->position.x, target->position.y, 0);
+	Vector3D pos2 = vector3d(target.x, target.y, 0);
 	Vector3D dir;
 	vector3d_sub(dir, pos1, pos2);
 	float lookRot = GFC_PI+GFC_HALF_PI+atan2(dir.y, dir.x);

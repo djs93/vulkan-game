@@ -146,13 +146,13 @@ Vector3D getAngles(Matrix4 mat) {
 		res.z = 0;
 	}
 	if (res.x < 0.0f) {
-		res.x += GFC_PI;
+		res.x += GFC_2PI;
 	}
 	if (res.y < 0.0f) {
-		res.y += GFC_PI;
+		res.y += GFC_2PI;
 	}
 	if (res.z < 0.0f) {
-		res.z += GFC_PI;
+		res.z += GFC_2PI;
 	}
 	return res;
 }

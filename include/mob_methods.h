@@ -29,5 +29,5 @@ void circler_think(Entity_T* self);
 void circler_touch(Entity_T* self, Entity_T* other);
 void circler_die(Entity_T* self);
 
-void look_towards(Entity_T* self, Entity_T* target);
+void look_towards(Entity_T* self, Vector3D target);
 #endif

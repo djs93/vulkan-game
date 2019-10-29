@@ -161,7 +161,7 @@ int main(int argc,char *argv[])
 	jumper->boundingBox.size.y *= 0.4f;
 	jumper->movetype = MOVETYPE_STEP;
 	jumper->nextthink = 0.1f;
-	jumper->maxspeed = vector3d(900.0f, 900.0f, 10000.0f);
+	jumper->maxspeed = vector3d(800.0f, 800.0f, 10000.0f);
 	jumper->healthmax = 1.0f;
 	jumper->health = jumper->healthmax;
 
@@ -169,12 +169,25 @@ int main(int argc,char *argv[])
 	jumper->nextthink = 0.1f;
 	jumper->touch = jumper_touch;
 	jumper->die = jumper_die;
-	slog("%f", getAngles(jumper->modelMat).z); 
-	rotate_entity(jumper, GFC_HALF_PI, vector3d(0, 0, 1));
-	slog("%f", getAngles(jumper->modelMat).z);
-	//teleport_entity(pacer, vector3d(60, 0, 0));
+
+	Entity_T* circler = modeled_entity_animated("circler", "circler", 0, 20);
+	circler->model->boudningAdjustment.z = -0.9f;
+	circler->movetype = MOVETYPE_STEP;
+	circler->nextthink = 0.1f;
+	circler->maxspeed = vector3d(800.0f, 800.0f, 10000.0f);
+	circler->healthmax = 1.0f;
+	circler->health = circler->healthmax;
+
+	circler->think = circler_think;
+	circler->nextthink = 0.1f;
+	circler->touch = circler_touch;
+	circler->die = circler_die;	
+
 	teleport_entity(pacer, vector3d(20, 20, 0));
 	teleport_entity(jumper, vector3d(60, -40, 20));
+	teleport_entity(circler, vector3d(-60, 40, 0));
+
+	slog("%f", getAngles(circler->modelMat).z);
 
 	rotate_entity(pacer, GFC_HALF_PI, vector3d(0, 0, 1));
 
