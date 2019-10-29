@@ -97,9 +97,6 @@ void physics_step(Entity_T* ent) {
 			float entZBottom = ent->position.z;
 			if (!ent->groundentity && otherZTop < entZBottom) {
 				ent->groundentity = other;
-				if (ent == player) {
-					slog("Ground entity now %s", other->name);
-				}
 			}
 			//Test in x direction for clip
 			vector3d_set(testOrigin, tempOrigin.x, ent->boundingBox.position.y, ent->boundingBox.position.z);

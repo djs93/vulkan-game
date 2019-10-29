@@ -290,6 +290,12 @@ int main(int argc,char *argv[])
 			gfc_matrix_slog(player->modelMat);
 		}
 		update_physics_positions();
+		update_physics_positions();
+		update_physics_positions();
+		update_physics_positions();
+		check_death();
+		check_death();
+		check_death();
 		check_death();
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool
