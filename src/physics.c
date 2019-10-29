@@ -97,7 +97,6 @@ void physics_step(Entity_T* ent) {
 			float entZBottom = ent->position.z;
 			if (!ent->groundentity && otherZTop < entZBottom) {
 				ent->groundentity = other;
-				slog("Set GE %s for %s", other->name, ent->name);
 				if (ent == player) {
 					slog("Ground entity now %s", other->name);
 				}
@@ -125,6 +124,7 @@ void physics_step(Entity_T* ent) {
 		ent->position.x += tempVel.x;
 		//sync matrix and bbox positions
 		ent->boundingBox.position.x = ent->position.x;
+		ent->boundingBox.position.x += ent->model->boudningAdjustment.x;
 		if (ent == player) {
 			ent->boundingBox.position.x += 0.5f;
 		}
@@ -138,6 +138,7 @@ void physics_step(Entity_T* ent) {
 		ent->position.y += tempVel.y;
 		//sync matrix and bbox positions
 		ent->boundingBox.position.y = ent->position.y;
+		ent->boundingBox.position.y += ent->model->boudningAdjustment.y;
 		ent->modelMat[3][1] = ent->position.y;
 	}
 	else {
@@ -151,7 +152,6 @@ void physics_step(Entity_T* ent) {
 		ent->boundingBox.position.z += ent->model->boudningAdjustment.z;
 		ent->modelMat[3][2] = ent->position.z;
 		if (ent->groundentity) { 
-			slog("Set GE NULL for %s", ent->name);
 			ent->groundentity = NULL; 
 		}
 	}

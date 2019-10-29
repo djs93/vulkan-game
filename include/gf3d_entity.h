@@ -15,7 +15,7 @@ typedef enum
 typedef struct Entity_S
 {
 	char*			name;			/**<name of the entity*/
-    Uint8           _inuse;         /**<flag to keep track if this isntance is in use and should not be reassigned*/
+    int           _inuse;         /**<flag to keep track if this isntance is in use and should not be reassigned*/
     Model          *model;          /**<the 3d model for this entity*/
 	Matrix4			modelMat;		/**<the model matrix*/
     Vector3D         position;       /**<DO NOT DIRECTLY MODIFY - position of the entity in 3d space*/

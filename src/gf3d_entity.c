@@ -136,14 +136,23 @@ Vector3D getAngles(Matrix4 mat) {
 
 	Bool singular = sy < 0.000001f;
 	if (!singular) {
-		res.x = atan2(mat[2][1], mat[2][2]) * GFC_RADTODEG;
-		res.y = atan2(-mat[2][0], sy) * GFC_RADTODEG;
-		res.z = atan2(mat[1][0], mat[0][0]) * GFC_RADTODEG;
+		res.x = atan2(mat[2][1], mat[2][2]);
+		res.y = atan2(-mat[2][0], sy);
+		res.z = atan2(mat[1][0], mat[0][0]);
 	}
 	else {
-		res.x = atan2(-mat[1][2], mat[1][1]) * GFC_RADTODEG;
-		res.y = atan2(-mat[2][0], sy) * GFC_RADTODEG;
+		res.x = atan2(-mat[1][2], mat[1][1]);
+		res.y = atan2(-mat[2][0], sy);
 		res.z = 0;
+	}
+	if (res.x < 0.0f) {
+		res.x += GFC_PI;
+	}
+	if (res.y < 0.0f) {
+		res.y += GFC_PI;
+	}
+	if (res.z < 0.0f) {
+		res.z += GFC_PI;
 	}
 	return res;
 }

@@ -152,8 +152,29 @@ int main(int argc,char *argv[])
 	Vector3D accelV3 = vector3d(10, 0, 0);
 	pacer->data2 = &accelV3;
 	pacer->acceleration = accelV3;
+
+	Entity_T* jumper = modeled_entity_animated("robot", "jumper", 0, 24);
+	jumper->model->boudningAdjustment.z = -1.9f;
+	jumper->model->boudningAdjustment.y = -1.9f;
+	jumper->model->boudningAdjustment.x = -0.8f;
+	jumper->boundingBox.size.z *= 0.8f;
+	jumper->boundingBox.size.y *= 0.4f;
+	jumper->movetype = MOVETYPE_STEP;
+	jumper->nextthink = 0.1f;
+	jumper->maxspeed = vector3d(900.0f, 900.0f, 10000.0f);
+	jumper->healthmax = 1.0f;
+	jumper->health = jumper->healthmax;
+
+	jumper->think = jumper_think;
+	jumper->nextthink = 0.1f;
+	jumper->touch = jumper_touch;
+	jumper->die = jumper_die;
+	slog("%f", getAngles(jumper->modelMat).z); 
+	rotate_entity(jumper, GFC_HALF_PI, vector3d(0, 0, 1));
+	slog("%f", getAngles(jumper->modelMat).z);
 	//teleport_entity(pacer, vector3d(60, 0, 0));
 	teleport_entity(pacer, vector3d(20, 20, 0));
+	teleport_entity(jumper, vector3d(60, -40, 20));
 
 	rotate_entity(pacer, GFC_HALF_PI, vector3d(0, 0, 1));
 
@@ -250,6 +271,10 @@ int main(int argc,char *argv[])
 			ent1->velocity.z = ent1->specFloat1;
 			int combo = ent1->flags | FL_JUMPING;
 			ent1->flags = combo;
+		}
+		if (keys[SDL_SCANCODE_RIGHT]) {
+			rotate_entity(player, -0.01f, vector3d(0,0,1));
+			gfc_matrix_slog(player->modelMat);
 		}
 		update_physics_positions();
 		check_death();

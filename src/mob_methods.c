@@ -1,6 +1,7 @@
 #include "mob_methods.h"
 #include "simple_logger.h"
 
+void set_rotation(Matrix4 out, Matrix4 in, Vector3D theta);
 void mushroom_think(Entity_T* self)
 {
 	rotate_entity(self, 0.01, vector3d(0, 0, 1));
@@ -70,7 +71,7 @@ void speed_up_touch(Entity_T* self, Entity_T* other)
 void speed_up_die(Entity_T* self)
 {
 	if (self->position.z > -30) {
-		teleport_entity(self, vector3d(self->position.x, self->position.y, self->position.z - 0.06f));
+		teleport_entity(self, vector3d(self->position.x, self->position.y, self->position.z - 0.08f));
 	}
 	else {
 		self->_inuse = 0;
@@ -109,11 +110,12 @@ void pacer_think(Entity_T* self) {
 }
 void pacer_touch(Entity_T* self, Entity_T* other) {
 	if (other == player) {//should move player-specifics away from bouncing so if the ent hits a wall it can bounce
-		slog("thouch");
 		if (other->boundingBox.position.z - other->boundingBox.size.z + 0.1f > self->boundingBox.position.z + self->boundingBox.size.z) {
 			self->health = 0.0f;
-			self->movetype = MOVETYPE_NONE;
-			other->velocity.z = player->specFloat1;
+			self->movetype = MOVETYPE_NOCLIP;
+			teleport_entity(other, vector3d(other->position.x, other->position.y, other->position.z + 1.5f));
+			other->velocity.z = other->specFloat1;
+			other->groundentity = NULL;
 			return;
 		}
 		float zRot = getAngles(self->modelMat).z;
@@ -137,27 +139,6 @@ void pacer_touch(Entity_T* self, Entity_T* other) {
 		}
 		rotate_entity(self, GFC_PI, vector3d(0, 0, 1));
 	}
-	/**
-	if (other == player && !(self->flags & FL_PUSHED)) {
-		//accelerate sharply away
-		slog("in here");
-		self->flags = self->flags | FL_PUSHED;
-		self->data2 = &self->acceleration; //store normal acceleration before push
-		Vector3D push, forward, side, u;
-		forward.x = self->boundingBox.position.x - other->boundingBox.position.x;
-		forward.y = self->boundingBox.position.y - other->boundingBox.position.y;
-		forward.z = 0;
-		//vector3d_normalize(&forward);
-
-		vector3d_cross_product(&side, forward, vector3d(0,0,1));
-		//vector3d_normalize(&side);
-
-		vector3d_add(push, forward, side);
-		//vector3d_add(push, push, vector3d(0, 0, 1));
-		self->data = &push;
-		vector3d_scale(self->acceleration, push, 300);
-	}
-	*/
 }
 void pacer_die(Entity_T* self) {
 	speed_up_die(self);
@@ -171,16 +152,31 @@ void jumper_think(Entity_T* self)
 {
 	//jump
 	if (!(self->flags & FL_JUMPING)) {
-		self->velocity.z = 1500.0f;
+		self->velocity.z = 2000.0f;
 		self->flags = self->flags | FL_JUMPING;
 		//rotate to face player when impacting ground
 	}
+	look_towards(self, player);
 	//set xy acceleration to point at player
+	Vector3D forward;
+	vector3d_sub(forward, player->position, self->position);
+	vector3d_normalize(&forward);
+	vector3d_scale(forward, forward, 15.0f);
+	vector3d_copy(self->acceleration, forward);
+	self->nextthink = 0.1f;
 }
 
 void jumper_touch(Entity_T* self, Entity_T* other)
 {
 	//check for stomp
+	if (other==player && other->boundingBox.position.z - other->boundingBox.size.z + 0.1f > self->boundingBox.position.z + self->boundingBox.size.z) {
+		self->health = 0.0f;
+		self->movetype = MOVETYPE_NOCLIP;
+		teleport_entity(other, vector3d(other->position.x, other->position.y, other->position.z + 1.5f));
+		other->velocity.z = other->specFloat1;
+		other->groundentity = NULL;
+		return;
+	}
 	//jump off player else
 }
 
@@ -193,6 +189,7 @@ void circler_think(Entity_T* self)
 {
 	//rotate slightly
 	//change acceleration to point forward relative to ent
+	self->nextthink = 0.1f;
 }
 
 void circler_touch(Entity_T* self, Entity_T* other)
@@ -204,4 +201,50 @@ void circler_touch(Entity_T* self, Entity_T* other)
 void circler_die(Entity_T* self)
 {
 	speed_up_die(self);
+}
+
+void look_towards(Entity_T* self, Entity_T* target) {
+	Vector3D pos1 = vector3d(self->position.x, self->position.y, 0);
+	Vector3D pos2 = vector3d(target->position.x, target->position.y, 0);
+	Vector3D dir;
+	vector3d_sub(dir, pos1, pos2);
+	float lookRot = GFC_PI+GFC_HALF_PI+atan2(dir.y, dir.x);
+	set_rotation(self->modelMat, self->modelMat, vector3d(0,0,lookRot));
+}
+
+void set_rotation(Matrix4 out, Matrix4 in, Vector3D theta) {
+	Matrix4 Rotate;
+	gfc_matrix_identity(Rotate);
+	gfc_matrix_multiply(Rotate, Rotate, in);
+	Matrix4 Result;
+	Vector3D temp;
+	Vector3D axis = vector3d(0, 0, 1);
+	float a = theta.z;
+	float c = cos(a);
+	float s = sin(a);
+
+	vector3d_normalize(&axis);
+
+	vector3d_scale(temp, axis, (1 - c));
+
+	Rotate[0][0] = c + temp.x * axis.x;
+	Rotate[0][1] = temp.x * axis.y + s * axis.z;
+	Rotate[0][2] = temp.x * axis.z - s * axis.y;
+
+	Rotate[1][0] = temp.y * axis.x - s * axis.z;
+	Rotate[1][1] = c + temp.y * axis.y;
+	Rotate[1][2] = temp.y * axis.z + s * axis.x;
+
+	Rotate[2][0] = temp.z * axis.x + s * axis.y;
+	Rotate[2][1] = temp.z * axis.y - s * axis.x;
+	Rotate[2][2] = c + temp.z * axis.z;
+
+	Rotate[3][0] = in[3][0];
+	Rotate[3][1] = in[3][1];
+	Rotate[3][2] = in[3][2];
+	Rotate[3][3] = in[3][3];
+
+	gfc_matrix_copy(out, Rotate);
+
+
 }
