@@ -522,4 +522,8 @@ void gf3d_swapchain_create_image(uint32_t width, uint32_t height, VkFormat forma
     vkBindImageMemory(gf3d_swapchain.device, *image, *imageMemory, 0);
 }
 
+VkImage* gf3d_swapchain_getImages() {
+	return gf3d_swapchain.swapImages;
+}
+
 /*eol@eof*/

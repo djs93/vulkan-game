@@ -14,11 +14,14 @@
 #include "physics.h"
 #include "local.h"
 #include "mob_methods.h"
+#include "gf3d_ui.h"
+#include "gf3d_sprite.h"
 
 level_locals level;
 Entity_T* entity_list;
 Entity_T* player;
 void draw_entities();
+void draw_ui();
 void sync_camera();
 void TestThink(Entity_T* self);
 void check_death();
@@ -75,6 +78,7 @@ int main(int argc,char *argv[])
 	// set up entities
 	#pragma region set up entities
 	gf3d_entity_manager_init(ENTITY_MAX);
+	gf3d_ui_manager_init(5);
 	Entity_T* ent1 = modeled_entity_animated("teemo", "player", 0, 17);
 	player = ent1;
 	ent1->movetype = MOVETYPE_STEP;
@@ -191,6 +195,36 @@ int main(int argc,char *argv[])
 
 	rotate_entity(pacer, GFC_HALF_PI, vector3d(0, 0, 1));
 
+	Sprite* mouse = NULL;
+	int mousex, mousey;
+	Uint32 mouseFrame = 0;
+	mouse = gf3d_sprite_load("images/pointer.png", 32, 32, 16);
+
+	Texture* test = gf3d_texture_load("images/dino.png");
+	UILayer testlayer;
+	testlayer.filter = VK_FILTER_LINEAR;
+	testlayer.image = test->textureImage;
+	testlayer.inuse = true;
+	testlayer.layout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	testlayer.regionCount = 1;
+	VkImageBlit imageBlit;
+
+	// Source
+	imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	imageBlit.srcSubresource.layerCount = 1;
+	imageBlit.srcSubresource.mipLevel = 0;
+	imageBlit.srcOffsets[1].x = 1024;
+	imageBlit.srcOffsets[1].y = 1024;
+	imageBlit.srcOffsets[1].z = 1;
+	imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	imageBlit.dstSubresource.layerCount = 1;
+	imageBlit.dstSubresource.mipLevel = 0;
+	imageBlit.dstOffsets[1].x = gf3d_swapchain_get_extent().width;
+	imageBlit.dstOffsets[1].y = gf3d_swapchain_get_extent().height;
+	imageBlit.dstOffsets[1].z = 1;
+
+	testlayer.regions = &imageBlit;
+
 	#pragma endregion
 	float accel = 15.0f;
     while(!done)
@@ -289,6 +323,9 @@ int main(int argc,char *argv[])
 			rotate_entity(player, -0.01f, vector3d(0,0,1));
 			gfc_matrix_slog(player->modelMat);
 		}
+		SDL_GetMouseState(&mousex, &mousey);
+
+		slog("mouse (%i,%i)", mousex, mousey);
 		update_physics_positions();
 		update_physics_positions();
 		update_physics_positions();
@@ -297,11 +334,15 @@ int main(int argc,char *argv[])
 		check_death();
 		check_death();
 		check_death();
+
+		
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool
         bufferFrame = gf3d_vgraphics_render_begin();
-        gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_pipeline(),bufferFrame);
-            commandBuffer = gf3d_command_rendering_begin(bufferFrame);
+		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_model_pipeline(), bufferFrame);
+		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_overlay_pipeline(), bufferFrame);
+
+		commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
 
 				draw_entities(bufferFrame, commandBuffer, (int)frame);
 				sync_camera(ent1);
@@ -311,8 +352,14 @@ int main(int argc,char *argv[])
 				level.time = level.framenum * 0.1f;
 
             gf3d_command_rendering_end(commandBuffer);
-            
-        gf3d_vgraphics_render_end(bufferFrame);
+
+		// 2D overlay rendering
+		commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_overlay_pipeline());
+
+		gf3d_sprite_draw(mouse, vector2d(mousex, mousey), (int)frame%16, bufferFrame, commandBuffer);
+
+		gf3d_command_rendering_end(commandBuffer);
+		gf3d_vgraphics_render_end(bufferFrame);
 
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
     }    
@@ -344,6 +391,14 @@ void draw_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame)
 			gf3d_model_draw(ent->model, bufferFrame, commandBuffer, ent->modelMat, (Uint32)frame%ent->model->frameCount);
 		}
 
+		i++;
+	}
+}
+
+void draw_ui(int bufferFrame, VkCommandBuffer commandBuffer) {
+	int i = 0;
+	while (i < gf3d_ui.max_layers) {
+		gf3d_ui_draw(gf3d_ui.layer_list[i], commandBuffer, bufferFrame);
 		i++;
 	}
 }

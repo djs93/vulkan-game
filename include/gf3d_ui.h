@@ -5,8 +5,25 @@
 
 typedef struct
 {
-	Texture* texture;
-	Bool _inuse;
+	VkImage* image;
+	VkImageLayout layout;
+	uint32_t regionCount;
+	VkImageBlit* regions;
+	VkFilter filter;
+	Bool inuse;
 }UILayer;
+
+typedef struct
+{
+	UILayer* layer_list;
+	Uint32   max_layers;
+}UIManager;
+
+static UIManager gf3d_ui = { 0, 0 };
+
+void gf3d_ui_draw(UILayer layer, VkCommandBuffer commandBuffer, int bufferFrame);
+void gf3d_ui_manager_init(Uint32 max_layers);
+void gf3d_ui_manager_close();
+void gf3d_ui_delete(UILayer* layer);
 
 #endif

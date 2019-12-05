@@ -7,18 +7,19 @@
 
 typedef struct
 {
-    Uint8               _inuse;
-    Uint32              _refcount;
-    TextLine            filename;
-    VkImage             textureImage;
-    VkDeviceMemory      textureImageMemory;
-    VkImageView         textureImageView;
-    VkSampler           textureSampler;
+	Uint8               _inuse;
+	Uint32              _refcount;
+	Uint32              width, height;
+	TextLine            filename;
+	VkImage             textureImage;
+	VkDeviceMemory      textureImageMemory;
+	VkImageView         textureImageView;
+	VkSampler           textureSampler;
 }Texture;
 
 
 void gf3d_texture_init(Uint32 max_textures);
-Texture *gf3d_texture_load(char *filename);
-void gf3d_texture_free(Texture *tex);
+Texture* gf3d_texture_load(char* filename);
+void gf3d_texture_free(Texture* tex);
 
 #endif
