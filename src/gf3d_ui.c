@@ -6,41 +6,66 @@
 void gf3d_ui_manager_close()
 {
 	int i;
-	for (i = 0; i < gf3d_ui.max_layers; i++)
+	for (i = 0; i < gf3d_ui.max_elements; i++)
 	{
-		gf3d_ui_delete(&gf3d_ui.layer_list[i]);
+		gf3d_ui_delete(&gf3d_ui.element_list[i]);
 	}
-	if (gf3d_ui.layer_list)
+	if (gf3d_ui.element_list)
 	{
-		free(gf3d_ui.layer_list);
+		free(gf3d_ui.element_list);
 	}
 	memset(&gf3d_ui, 0, sizeof(UIManager));
 	slog("model manager closed");
 }
 
-void gf3d_ui_manager_init(Uint32 max_layers)
+void gf3d_ui_manager_init(Uint32 max_elements)
 {
-	if (max_layers == 0)
+	if (max_elements == 0)
 	{
 		slog("cannot intilizat model manager for 0 models");
 		return;
 	}
-	gf3d_ui.layer_list = (Model*)gfc_allocate_array(sizeof(Model), max_layers);
-	gf3d_ui.max_layers = max_layers;
+	gf3d_ui.element_list = (Model*)gfc_allocate_array(sizeof(Model), max_elements);
+	gf3d_ui.max_elements = max_elements;
 
 	slog("model manager initiliazed");
 	atexit(gf3d_ui_manager_close);
 }
 
-void gf3d_ui_draw(UILayer layer, VkCommandBuffer commandBuffer, int bufferFrame) {
-	int i = 0;
-	//grab swapchain image to blit to
-	VkImage blitImage = gf3d_swapchain_getImages()[bufferFrame];
-	//blit for each region defined in the layer
-	vkCmdBlitImage(commandBuffer, &layer.image, layer.layout, blitImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, layer.regionCount, layer.regions, layer.filter);
+void gf3d_ui_draw(UIElement* element, int frame, Vector2D position, Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
+	gf3d_sprite_draw(element->sprite, element->position, (Uint32)frame % element->sprite->frameCount, bufferFrame, commandBuffer);
 }
 
-void gf3d_ui_delete(UILayer* layer) {
-	layer->inuse = false;
-	memset(layer, 0, sizeof(UILayer));
+void gf3d_ui_delete(UIElement* element) {
+	element->inuse = false;
+	memset(element, 0, sizeof(UIElement));
 }
+
+void gf3d_ui_draw_all(int frame, Uint32 bufferFrame, VkCommandBuffer commandBuffer)
+{
+	int i;
+	for (i = 0; i < gf3d_ui.max_elements; i++) {
+		if (gf3d_ui.element_list[i].inuse) {
+			gf3d_ui_draw(&gf3d_ui.element_list[i], frame, gf3d_ui.element_list[i].position, bufferFrame, commandBuffer);
+		}
+	}
+}
+
+UIElement* gf3d_ui_new()
+{
+	UIElement* ele = NULL;
+	int i;
+	for (i = 0; i < gf3d_ui.max_elements; i++)
+	{
+		if (gf3d_ui.element_list[i].inuse)continue;
+		//. found a free entity
+		memset(&gf3d_ui.element_list[i], 0, sizeof(UIElement));
+		ele = &gf3d_ui.element_list[i];
+		ele->inuse = 1;
+		ele->onClick = NULL;
+		return &gf3d_ui.element_list[i];
+	}
+	slog("request for entity failed: all full up");
+	return NULL;
+}
+

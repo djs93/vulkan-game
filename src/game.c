@@ -21,7 +21,6 @@ level_locals level;
 Entity_T* entity_list;
 Entity_T* player;
 void draw_entities();
-void draw_ui();
 void sync_camera();
 void TestThink(Entity_T* self);
 void check_death();
@@ -199,32 +198,9 @@ int main(int argc,char *argv[])
 	int mousex, mousey;
 	Uint32 mouseFrame = 0;
 	mouse = gf3d_sprite_load("images/pointer.png", 32, 32, 16);
-
-	Texture* test = gf3d_texture_load("images/dino.png");
-	UILayer testlayer;
-	testlayer.filter = VK_FILTER_LINEAR;
-	testlayer.image = test->textureImage;
-	testlayer.inuse = true;
-	testlayer.layout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-	testlayer.regionCount = 1;
-	VkImageBlit imageBlit;
-
-	// Source
-	imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	imageBlit.srcSubresource.layerCount = 1;
-	imageBlit.srcSubresource.mipLevel = 0;
-	imageBlit.srcOffsets[1].x = 1024;
-	imageBlit.srcOffsets[1].y = 1024;
-	imageBlit.srcOffsets[1].z = 1;
-	imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	imageBlit.dstSubresource.layerCount = 1;
-	imageBlit.dstSubresource.mipLevel = 0;
-	imageBlit.dstOffsets[1].x = gf3d_swapchain_get_extent().width;
-	imageBlit.dstOffsets[1].y = gf3d_swapchain_get_extent().height;
-	imageBlit.dstOffsets[1].z = 1;
-
-	testlayer.regions = &imageBlit;
-
+	
+	UIElement* mouseEle = gf3d_ui_new();
+	mouseEle->sprite = mouse;
 	#pragma endregion
 	float accel = 15.0f;
     while(!done)
@@ -356,7 +332,8 @@ int main(int argc,char *argv[])
 		// 2D overlay rendering
 		commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_overlay_pipeline());
 
-		gf3d_sprite_draw(mouse, vector2d(mousex, mousey), (int)frame%16, bufferFrame, commandBuffer);
+		mouseEle->position = vector2d(mousex, mousey);
+		gf3d_ui_draw_all((int)frame, bufferFrame, commandBuffer);
 
 		gf3d_command_rendering_end(commandBuffer);
 		gf3d_vgraphics_render_end(bufferFrame);
@@ -391,14 +368,6 @@ void draw_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame)
 			gf3d_model_draw(ent->model, bufferFrame, commandBuffer, ent->modelMat, (Uint32)frame%ent->model->frameCount);
 		}
 
-		i++;
-	}
-}
-
-void draw_ui(int bufferFrame, VkCommandBuffer commandBuffer) {
-	int i = 0;
-	while (i < gf3d_ui.max_layers) {
-		gf3d_ui_draw(gf3d_ui.layer_list[i], commandBuffer, bufferFrame);
 		i++;
 	}
 }
