@@ -69,3 +69,23 @@ UIElement* gf3d_ui_new()
 	return NULL;
 }
 
+void gf3d_ui_doClick(int mouseX, int mouseY)
+{
+	int i;
+	UIElement* clickyEle = NULL; //The element clicked
+	for (i = 0; i < gf3d_ui.max_elements; i++)
+	{
+		UIElement* currentEle = &gf3d_ui.element_list[i];
+		if (!currentEle->inuse)continue;
+		if (!currentEle->onClick)continue;
+		if (mouseX > currentEle->position.x && mouseX < currentEle->position.x + currentEle->sprite->texture->width) {
+			if (mouseY > currentEle->position.y && mouseY < currentEle->position.y + currentEle->sprite->texture->height) {
+				clickyEle = currentEle;
+			}
+		}
+	}
+	if (clickyEle) {
+		clickyEle->onClick(clickyEle);
+	}
+}
+

@@ -16,6 +16,7 @@
 #include "mob_methods.h"
 #include "gf3d_ui.h"
 #include "gf3d_sprite.h"
+#include "window_methods.h"
 
 level_locals level;
 Entity_T* entity_list;
@@ -196,16 +197,22 @@ int main(int argc,char *argv[])
 
 	Sprite* mouse = NULL;
 	int mousex, mousey;
-	Uint32 mouseFrame = 0;
 	mouse = gf3d_sprite_load("images/pointer.png", 32, 32, 16);
 	
 	UIElement* mouseEle = gf3d_ui_new();
 	mouseEle->sprite = mouse;
+
+	UIElement* testBox = gf3d_ui_new();
+	testBox->sprite = gf3d_sprite_load("images/ground.png", -1, -1, 1);
+	testBox->onClick = testClick;
+	testBox->position = vector2d(300, 300);
+
 	#pragma endregion
 	float accel = 15.0f;
     while(!done)
     {
         SDL_PumpEvents();   // update SDL's internal event structures
+		SDL_GetMouseState(&mousex, &mousey);
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_KEYDOWN:
@@ -278,6 +285,11 @@ int main(int argc,char *argv[])
 						break;
 					}
 					break;
+				case SDL_MOUSEBUTTONDOWN:
+					if (event.button.button == SDL_BUTTON_LEFT) {
+						gf3d_ui_doClick(mousex, mousey);
+					}
+					break;
 				default:
 					break;
 			}
@@ -299,9 +311,10 @@ int main(int argc,char *argv[])
 			rotate_entity(player, -0.01f, vector3d(0,0,1));
 			gfc_matrix_slog(player->modelMat);
 		}
-		SDL_GetMouseState(&mousex, &mousey);
+
 
 		slog("mouse (%i,%i)", mousex, mousey);
+
 		update_physics_positions();
 		update_physics_positions();
 		update_physics_positions();

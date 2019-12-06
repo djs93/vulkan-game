@@ -132,6 +132,9 @@
     <ClInclude Include="..\include\gf3d_texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\window_methods.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\gfc\simple_json\src\simple_json.c">
@@ -243,6 +246,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gf3d_sprite.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\window_methods.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

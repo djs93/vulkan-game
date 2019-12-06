@@ -124,6 +124,7 @@
     <ClInclude Include="..\include\local.h" />
     <ClInclude Include="..\include\mob_methods.h" />
     <ClInclude Include="..\include\physics.h" />
+    <ClInclude Include="..\include\window_methods.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\gfc\simple_json\src\simple_json.c" />
@@ -163,6 +164,7 @@
     <ClCompile Include="..\src\gf3d_vqueues.c" />
     <ClCompile Include="..\src\mob_methods.c" />
     <ClCompile Include="..\src\physics.c" />
+    <ClCompile Include="..\src\window_methods.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
