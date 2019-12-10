@@ -78,7 +78,7 @@ int main(int argc,char *argv[])
 	// set up entities
 	#pragma region set up entities
 	gf3d_entity_manager_init(ENTITY_MAX);
-	gf3d_ui_manager_init(5);
+	gf3d_ui_manager_init(UI_MAX);
 	Entity_T* ent1 = modeled_entity_animated("teemo", "player", 0, 17);
 	player = ent1;
 	ent1->movetype = MOVETYPE_STEP;
@@ -190,8 +190,6 @@ int main(int argc,char *argv[])
 	teleport_entity(pacer, vector3d(20, 20, 0));
 	teleport_entity(jumper, vector3d(60, -40, 20));
 	teleport_entity(circler, vector3d(-60, 40, 0));
-
-	slog("%f", getAngles(circler->modelMat).z);
 
 	rotate_entity(pacer, GFC_HALF_PI, vector3d(0, 0, 1));
 
@@ -312,9 +310,6 @@ int main(int argc,char *argv[])
 			gfc_matrix_slog(player->modelMat);
 		}
 
-
-		slog("mouse (%i,%i)", mousex, mousey);
-
 		update_physics_positions();
 		update_physics_positions();
 		update_physics_positions();
@@ -323,7 +318,6 @@ int main(int argc,char *argv[])
 		check_death();
 		check_death();
 		check_death();
-
 		
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool

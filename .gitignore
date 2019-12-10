@@ -63,3 +63,8 @@ shaders/News/
 
 *Copy.sln
 *.suo
+/images/platform_one_two.png
+/images/platform_one_test.png
+/images/platform_one.psd
+/images/ground.psd
+/models/Arrow.fbx

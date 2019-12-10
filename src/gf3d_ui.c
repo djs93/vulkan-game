@@ -44,7 +44,15 @@ void gf3d_ui_delete(UIElement* element) {
 void gf3d_ui_draw_all(int frame, Uint32 bufferFrame, VkCommandBuffer commandBuffer)
 {
 	int i;
+	/* first in, farthest back method
 	for (i = 0; i < gf3d_ui.max_elements; i++) {
+		if (gf3d_ui.element_list[i].inuse) {
+			gf3d_ui_draw(&gf3d_ui.element_list[i], frame, gf3d_ui.element_list[i].position, bufferFrame, commandBuffer);
+		}
+	}
+	*/
+	//first in, furthest front method (aka the one we're using)
+	for (i = gf3d_ui.max_elements-1; i >= 0; i--) {
 		if (gf3d_ui.element_list[i].inuse) {
 			gf3d_ui_draw(&gf3d_ui.element_list[i], frame, gf3d_ui.element_list[i].position, bufferFrame, commandBuffer);
 		}
