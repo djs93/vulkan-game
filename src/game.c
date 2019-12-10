@@ -63,8 +63,8 @@ int main(int argc,char *argv[])
     slog("gf3d begin");
     gf3d_vgraphics_init(
         "gf3d",                 //program name
-        1200,                   //screen width
-        700,                    //screen height
+        1600,                   //screen width
+        900,                    //screen height
         vector4d(0.51,0.75,1,1),//background color
         0,                      //fullscreen
         validate,               //validation
