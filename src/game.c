@@ -92,6 +92,8 @@ int main(int argc,char *argv[])
 	ent1->think = player_think;
 	ent1->nextthink = 0.1f;
 	ent1->model->boudningAdjustment.z = 1.2f;
+	ent1->type = "player";
+	save_entity_layout_json(player);
 
 	Entity_T* ent2 = modeled_entity_animated("ezreal", "Ezreal2", 0, 1);
 	ent2->movetype = MOVETYPE_STEP;

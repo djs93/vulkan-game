@@ -107,6 +107,7 @@ Model* gf3d_model_load_animated(char* filename, Uint32 startFrame, Uint32 endFra
 
 	snprintf(assetname, GFCLINELEN, "images/%s.png", filename);
 	model->texture = gf3d_texture_load(assetname);
+	strcpy(model->filename, filename);
 
 	return model;
 }

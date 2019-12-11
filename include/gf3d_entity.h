@@ -15,6 +15,7 @@ typedef enum
 typedef struct Entity_S
 {
 	char*			name;			/**<name of the entity*/
+	char*			type;			/**Type of the entitiy*/
     int           _inuse;         /**<flag to keep track if this isntance is in use and should not be reassigned*/
     Model          *model;          /**<the 3d model for this entity*/
 	Matrix4			modelMat;		/**<the model matrix*/
@@ -39,7 +40,7 @@ typedef struct Entity_S
 	int linkcount;
 	int groundentity_linkcount;
 
-	Uint8 flags;
+	int flags;
 	int svflags;
 
 	AABB boundingBox;
@@ -90,5 +91,9 @@ Entity_T* modeled_entity_animated(char* modelName, char* entityName, int startFr
 Entity_T* modeled_entity(char* modelName, char* entityName);
 
 Vector3D getAngles(Matrix4 mat);
+
+Entity_T* load_entity_json(char* entityName);
+
+void save_entity_layout_json(Entity_T* entity);
 
 #endif

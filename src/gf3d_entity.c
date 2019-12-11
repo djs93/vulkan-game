@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "simple_logger.h"
+#include "simple_json.h"
 
 #include "gf3d_entity.h"
 
@@ -156,6 +157,155 @@ Vector3D getAngles(Matrix4 mat) {
 	}
 	return res;
 }
+
+Entity_T* load_entity_json(char* entityName)
+{
+	return NULL;
+}
+
+//Helper function to save entity data into a loadable format
+void save_entity_layout_json(Entity_T* entity)
+{
+	SJson* file = sj_object_new();
+	if (entity->name) {
+		SJson* name = sj_new_str(entity->name);
+		sj_object_insert(file, "defaultname", name);
+	}
+
+	if (entity->type) {
+		SJson* type = sj_new_str(entity->type);
+		sj_object_insert(file, "type", type);
+	}
+
+	/*
+	SJson* inuse = sj_new_int(entity->_inuse);
+	sj_object_insert(file, "_inuse", inuse);
+	*/
+
+	if (entity->model) {
+		SJson* modelName = sj_new_str(entity->model->filename);
+		sj_object_insert(file, "modelFile", modelName);
+	}
+
+	/*
+	SJson* matArray = sj_array_new();
+	int i,j;
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
+			sj_array_append(matArray, sj_new_float(entity->modelMat[i][j]));
+		}
+	}
+	sj_object_insert(file, "modelMat", matArray);
+	
+
+	SJson* position = sj_array_new();
+	sj_array_append(position, sj_new_float(entity->position.x));
+	sj_array_append(position, sj_new_float(entity->position.y));
+	sj_array_append(position, sj_new_float(entity->position.z));
+	sj_object_insert(file, "position", position);
+
+	SJson* velocity = sj_array_new();
+	sj_array_append(velocity, sj_new_float(entity->velocity.x));
+	sj_array_append(velocity, sj_new_float(entity->velocity.y));
+	sj_array_append(velocity, sj_new_float(entity->velocity.z));
+	sj_object_insert(file, "velocity", velocity);
+
+	SJson* acceleration = sj_array_new();
+	sj_array_append(acceleration, sj_new_float(entity->acceleration.x));
+	sj_array_append(acceleration, sj_new_float(entity->acceleration.y));
+	sj_array_append(acceleration, sj_new_float(entity->acceleration.z));
+	sj_object_insert(file, "acceleration", acceleration);
+
+	SJson* rotation = sj_array_new();
+	sj_array_append(rotation, sj_new_float(entity->rotation.x));
+	sj_array_append(rotation, sj_new_float(entity->rotation.y));
+	sj_array_append(rotation, sj_new_float(entity->rotation.z));
+	sj_object_insert(file, "rotation", rotation);
+
+	SJson* scale = sj_array_new();
+	sj_array_append(scale, sj_new_float(entity->scale.x));
+	sj_array_append(scale, sj_new_float(entity->scale.y));
+	sj_array_append(scale, sj_new_float(entity->scale.z));
+	sj_object_insert(file, "scale", scale);
+
+	SJson* state = sj_new_int(entity->state);
+	sj_object_insert(file, "state", state);
+	*/
+
+	SJson* health = sj_new_float(entity->health);
+	sj_object_insert(file, "health", health);
+
+	SJson* healthMax = sj_new_float(entity->healthmax);
+	sj_object_insert(file, "healthmax", healthMax);
+
+	SJson* movetype = sj_new_int(entity->movetype);
+	sj_object_insert(file, "movetype", movetype);
+
+	SJson* nextthink = sj_new_float(entity->nextthink);
+	sj_object_insert(file, "nextthink", nextthink);
+
+	SJson* frame = sj_new_int(entity->frame);
+	sj_object_insert(file, "frame", frame);
+
+	/*
+	SJson* origin = sj_array_new();
+	sj_array_append(origin, sj_new_float(entity->origin.x));
+	sj_array_append(origin, sj_new_float(entity->origin.y));
+	sj_array_append(origin, sj_new_float(entity->origin.z));
+	sj_object_insert(file, "origin", origin);
+
+	SJson* old_origin = sj_array_new();
+	sj_array_append(old_origin, sj_new_float(entity->old_origin.x));
+	sj_array_append(old_origin, sj_new_float(entity->old_origin.y));
+	sj_array_append(old_origin, sj_new_float(entity->old_origin.z));
+	sj_object_insert(file, "oldorigin", old_origin);
+	*/
+
+	SJson* flags = sj_new_int(entity->flags);
+	sj_object_insert(file, "flags", flags);
+
+	SJson* svflags = sj_new_int(entity->svflags);
+	sj_object_insert(file, "svflags", svflags);
+
+	/*
+	SJson* AABBPos = sj_array_new();
+	sj_array_append(AABBPos, sj_new_float(entity->boundingBox.position.x));
+	sj_array_append(AABBPos, sj_new_float(entity->boundingBox.position.y));
+	sj_array_append(AABBPos, sj_new_float(entity->boundingBox.position.z));
+	sj_object_insert(file, "AABBPos", AABBPos);
+	*/
+
+	SJson* AABBSize = sj_array_new();
+	sj_array_append(AABBSize, sj_new_float(entity->boundingBox.size.x));
+	sj_array_append(AABBSize, sj_new_float(entity->boundingBox.size.y));
+	sj_array_append(AABBSize, sj_new_float(entity->boundingBox.size.z));
+	sj_object_insert(file, "AABBSize", AABBSize);
+
+	SJson* AABBAdjustments = sj_array_new();
+	sj_array_append(AABBAdjustments, sj_new_float(entity->model->boudningAdjustment.x));
+	sj_array_append(AABBAdjustments, sj_new_float(entity->model->boudningAdjustment.y));
+	sj_array_append(AABBAdjustments, sj_new_float(entity->model->boudningAdjustment.z));
+	sj_object_insert(file, "AABBAdjustments", AABBAdjustments);
+
+	SJson* maxspeed = sj_array_new();
+	sj_array_append(maxspeed, sj_new_float(entity->maxspeed.x));
+	sj_array_append(maxspeed, sj_new_float(entity->maxspeed.y));
+	sj_array_append(maxspeed, sj_new_float(entity->maxspeed.z));
+	sj_object_insert(file, "maxspeed", maxspeed);
+
+	SJson* specFloat1 = sj_new_float(entity->specFloat1);
+	sj_object_insert(file, "specFloat1", specFloat1);
+
+	//be sure to get special cases like think functions and additional data per ent-specific load!
+	char* fileName = malloc(strlen("mobs/")+strlen(entity->type)+ strlen(".json") +1);
+	strcpy(fileName, "mobs/");
+	strcat(fileName, entity->type);
+	strcat(fileName, ".json");
+	sj_save(file, fileName);
+	free(fileName);
+}
+
+
 
 
 /*eol@eof*/
