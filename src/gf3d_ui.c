@@ -99,18 +99,17 @@ void gf3d_ui_doClick(int mouseX, int mouseY, UIElement* clicker)
 
 UIElement* gf3d_ui_placeText(char* text, int posX, int posY, Vector4D color, int fontSize)
 {
-	TTF_Font* font = TTF_OpenFont("big_noodle_titling.tff", fontSize);
+	TTF_Font* font = TTF_OpenFont("fonts/big_noodle_titling.ttf", fontSize);
 	SDL_Color sdlColor;
 	sdlColor.r = color.x;
 	sdlColor.g = color.y;
 	sdlColor.b = color.z;
 	sdlColor.a = color.w;
-	SDL_Surface* text_surface = TTF_RenderText_Solid(font, text, sdlColor);
-	Sprite* text_sprite = gf3d_sprite_load_from_texture(gf3d_texture_load_from_surface(text, text_surface),-1,-1,0);
+	SDL_Surface* text_surface = TTF_RenderText_Blended(font, text, sdlColor);
+	Sprite* text_sprite = gf3d_sprite_load_from_texture(gf3d_texture_load_from_surface(text, text_surface),-1,-1,1);
 	UIElement* text_element = gf3d_ui_new();
 	text_element->sprite = text_sprite;
 	text_element->position.x = posX;
 	text_element->position.y = posY;
-	SDL_FreeSurface(text_surface);
 	return text_element;
 }

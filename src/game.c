@@ -17,6 +17,7 @@
 #include "gf3d_ui.h"
 #include "gf3d_sprite.h"
 #include "window_methods.h"
+#include "SDL_ttf.h"
 
 level_locals level;
 Entity_T* entity_list;
@@ -213,6 +214,7 @@ int main(int argc,char *argv[])
 
 	#pragma endregion
 	float accel = 15.0f;
+	TTF_Init();
 	setupMainMenu();
     while(!done)
     {
@@ -367,6 +369,7 @@ int main(int argc,char *argv[])
 		else { //blank out the background (need to render nothing in model pipeline)
 			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
 			gf3d_command_rendering_end(commandBuffer);
+			level.time += 0.1f;
 		}
 		// 2D overlay rendering
 
@@ -436,6 +439,6 @@ void check_death() {
 }
 
 void setupMainMenu() {
-
+	gf3d_ui_placeText("Test", 300, 300, vector4d(255, 255, 255, 255), 100);
 }
 /*eol@eof*/
