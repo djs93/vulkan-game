@@ -77,7 +77,7 @@ int main(int argc,char *argv[])
     // main game loop
     slog("gf3d main loop begin");
 
-	GameState state = GS_InGameMenu;
+	GameState state = GS_MainMenu;
 
 	// set up entities
 	#pragma region set up entities
@@ -220,7 +220,7 @@ int main(int argc,char *argv[])
 		SDL_GetMouseState(&mousex, &mousey);
 		keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
 
-		if (state == GS_Menu || state == GS_InGameMenu) {
+		if (state == GS_MainMenu || state == GS_InGameMenu) {
 			while (SDL_PollEvent(&event)) {
 				switch (event.type) {
 				case SDL_MOUSEBUTTONDOWN:
@@ -349,7 +349,7 @@ int main(int argc,char *argv[])
 		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_overlay_pipeline(), bufferFrame);
 		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_model_pipeline(), bufferFrame);
 
-		if (state != GS_Menu) {
+		if (state != GS_MainMenu) {
 			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
 
 			draw_entities(bufferFrame, commandBuffer, (int)level.modelTime);
