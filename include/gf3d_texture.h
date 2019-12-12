@@ -20,6 +20,7 @@ typedef struct
 
 void gf3d_texture_init(Uint32 max_textures);
 Texture* gf3d_texture_load(char* filename);
+Texture* gf3d_texture_load_from_surface(char* name, SDL_Surface* surface);
 void gf3d_texture_free(Texture* tex);
 
 #endif

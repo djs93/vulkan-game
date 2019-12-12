@@ -309,7 +309,7 @@ int main(int argc,char *argv[])
 					break;
 				case SDL_MOUSEBUTTONDOWN:
 					if (event.button.button == SDL_BUTTON_LEFT) {
-						gf3d_ui_doClick(mousex, mousey);
+						gf3d_ui_doClick(mousex, mousey, mouseEle);
 					}
 					break;
 				default:

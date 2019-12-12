@@ -184,6 +184,41 @@ Sprite * gf3d_sprite_load(char * filename,int frame_width,int frame_height, Uint
     return sprite;
 }
 
+Sprite* gf3d_sprite_load_from_texture(Texture* texture, int frame_width, int frame_height, Uint32 frames_per_line)
+{
+	Sprite* sprite;
+	sprite = gf3d_sprite_new();
+	if (!sprite)
+	{
+		return NULL;
+	}
+	sprite->texture = texture;
+	if (!sprite->texture)
+	{
+		slog("gf3d_sprite_load: failed to load texture for sprite");
+		gf3d_sprite_free(sprite);
+		return NULL;
+	}
+	if (frame_width < 0)frame_width = sprite->texture->width;
+	if (frame_height < 0)frame_height = sprite->texture->height;
+	sprite->frameWidth = frame_width;
+	sprite->frameHeight = frame_height;
+	sprite->framesPerLine = frames_per_line;
+	if (frame_height > 0) {
+		int lines = sprite->texture->height / frame_height;
+		sprite->frameCount = lines * frames_per_line;
+	}
+	else if (frames_per_line > 0) {
+		sprite->frameCount = frames_per_line;
+	}
+	else {
+		sprite->frameCount = 1;
+	}
+	gfc_line_cpy(sprite->filename, texture->filename);
+	gf3d_sprite_create_vertex_buffer(sprite);
+	return sprite;
+}
+
 void gf3d_sprite_free(Sprite *sprite)
 {
     int i;
