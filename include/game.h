@@ -4,4 +4,13 @@
 #define ENTITY_MAX 12
 #define UI_MAX 15
 typedef struct Entity_S Entity_T;
+
+typedef enum
+{
+	GS_Menu = 0,
+	GS_InGameMenu = 1,
+	GS_InGame = 2,
+	GS_InContentEditor = 3
+}GameState;
+
 #endif

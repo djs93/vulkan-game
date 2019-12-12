@@ -7,8 +7,9 @@
 typedef struct UIElement_S
 {
 	Bool inuse;
+	Bool hidden;
 	Sprite* sprite;
-	void (*onClick)(struct UIElement_S* self);
+	void (*onClick)(struct UIElement_S* self, struct UIElement_S* clicker);
 	Vector2D position;
 }UIElement;
 

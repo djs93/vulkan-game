@@ -23,6 +23,7 @@ Entity_T* entity_list;
 Entity_T* player;
 void draw_entities();
 void sync_camera();
+void setupMainMenu();
 void TestThink(Entity_T* self);
 void check_death();
 
@@ -32,6 +33,8 @@ int main(int argc,char *argv[])
     int a;
     Uint8 validate = 1;
 	float frame = 0;
+	level.time = 0;
+	level.modelTime = 0;
 	Uint8 dump = 0;
 	Uint8 trace = 0;
     const Uint8 * keys;
@@ -41,7 +44,6 @@ int main(int argc,char *argv[])
     Model *model2;
 	Vector3D testvec = vector3d(1.f, 0.f, 0.f);
 	SDL_Event event;
-
     
     for (a = 1; a < argc;a++)
     {
@@ -74,6 +76,8 @@ int main(int argc,char *argv[])
     
     // main game loop
     slog("gf3d main loop begin");
+
+	GameState state = GS_InGameMenu;
 
 	// set up entities
 	#pragma region set up entities
@@ -209,45 +213,63 @@ int main(int argc,char *argv[])
 
 	#pragma endregion
 	float accel = 15.0f;
+	setupMainMenu();
     while(!done)
     {
         SDL_PumpEvents();   // update SDL's internal event structures
 		SDL_GetMouseState(&mousex, &mousey);
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
+		keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
+
+		if (state == GS_Menu || state == GS_InGameMenu) {
+			while (SDL_PollEvent(&event)) {
+				switch (event.type) {
+				case SDL_MOUSEBUTTONDOWN:
+					if (event.button.button == SDL_BUTTON_LEFT) {
+						gf3d_ui_doClick(mousex, mousey, mouseEle);
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			mouseEle->position = vector2d(mousex, mousey);
+		}
+		else if (state == GS_InGame) {
+			while (SDL_PollEvent(&event)) {
+				switch (event.type) {
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.scancode) {
-						case(SDL_SCANCODE_D):
-							if (abs(ent1->acceleration.x - accel) <= accel) {
-								ent1->acceleration.x -= accel;
-							}
-							break;
-						case(SDL_SCANCODE_A):
-							if (abs(ent1->acceleration.x + accel) <= accel) {
-								ent1->acceleration.x += accel;
-							}
-							break;
-						case(SDL_SCANCODE_W):
-							if (abs(ent1->acceleration.y - accel) <= accel) {
-								ent1->acceleration.y -= accel;
-							}
-							break;
-						case(SDL_SCANCODE_S):
-							if (abs(ent1->acceleration.y + accel) <= accel) {
-								ent1->acceleration.y += accel;
-							}
-							break;
-						case(SDL_SCANCODE_LSHIFT):
-							if (!(player->flags & FL_SPRINTING)) {
-								slog("Set sprint");
-								player->maxspeed.x = player->maxspeed.x * 2;
-								player->maxspeed.y = player->maxspeed.y * 2;
-								int combo = player->flags | FL_SPRINTING;
-								player->flags = combo;
-							}
-							break;
-						default:
-							break;
+					case(SDL_SCANCODE_D):
+						if (abs(ent1->acceleration.x - accel) <= accel) {
+							ent1->acceleration.x -= accel;
+						}
+						break;
+					case(SDL_SCANCODE_A):
+						if (abs(ent1->acceleration.x + accel) <= accel) {
+							ent1->acceleration.x += accel;
+						}
+						break;
+					case(SDL_SCANCODE_W):
+						if (abs(ent1->acceleration.y - accel) <= accel) {
+							ent1->acceleration.y -= accel;
+						}
+						break;
+					case(SDL_SCANCODE_S):
+						if (abs(ent1->acceleration.y + accel) <= accel) {
+							ent1->acceleration.y += accel;
+						}
+						break;
+					case(SDL_SCANCODE_LSHIFT):
+						if (!(player->flags & FL_SPRINTING)) {
+							slog("Set sprint");
+							player->maxspeed.x = player->maxspeed.x * 2;
+							player->maxspeed.y = player->maxspeed.y * 2;
+							int combo = player->flags | FL_SPRINTING;
+							player->flags = combo;
+						}
+						break;
+					default:
+						break;
 					}
 					break;
 				case SDL_KEYUP:
@@ -292,57 +314,65 @@ int main(int argc,char *argv[])
 					break;
 				default:
 					break;
+				}
 			}
-		}
-		keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
-       
-		if (keys[SDL_SCANCODE_D] && keys[SDL_SCANCODE_A]) {
-			ent1->acceleration.x = 0.0f;
-		}
-		if (keys[SDL_SCANCODE_W] && keys[SDL_SCANCODE_S]) {
-			ent1->acceleration.y = 0.0f;
-		}
-		if (keys[SDL_SCANCODE_SPACE]&& !(ent1->flags & FL_JUMPING)) {
-			ent1->velocity.z = ent1->specFloat1;
-			int combo = ent1->flags | FL_JUMPING;
-			ent1->flags = combo;
-		}
-		if (keys[SDL_SCANCODE_RIGHT]) {
-			rotate_entity(player, -0.01f, vector3d(0,0,1));
-			gfc_matrix_slog(player->modelMat);
+
+			if (keys[SDL_SCANCODE_D] && keys[SDL_SCANCODE_A]) {
+				ent1->acceleration.x = 0.0f;
+			}
+			if (keys[SDL_SCANCODE_W] && keys[SDL_SCANCODE_S]) {
+				ent1->acceleration.y = 0.0f;
+			}
+			if (keys[SDL_SCANCODE_SPACE] && !(ent1->flags & FL_JUMPING)) {
+				ent1->velocity.z = ent1->specFloat1;
+				int combo = ent1->flags | FL_JUMPING;
+				ent1->flags = combo;
+			}
+			if (keys[SDL_SCANCODE_RIGHT]) {
+				rotate_entity(player, -0.01f, vector3d(0, 0, 1));
+				gfc_matrix_slog(player->modelMat);
+			}
+
+			update_physics_positions();
+			update_physics_positions();
+			update_physics_positions();
+			update_physics_positions();
+			check_death();
+			check_death();
+			check_death();
+			check_death();
 		}
 
-		update_physics_positions();
-		update_physics_positions();
-		update_physics_positions();
-		update_physics_positions();
-		check_death();
-		check_death();
-		check_death();
-		check_death();
-		
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool
         bufferFrame = gf3d_vgraphics_render_begin();
-		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_model_pipeline(), bufferFrame);
 		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_overlay_pipeline(), bufferFrame);
+		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_model_pipeline(), bufferFrame);
 
-		commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
+		if (state != GS_Menu) {
+			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
 
-				draw_entities(bufferFrame, commandBuffer, (int)frame);
-				sync_camera(ent1);
+			draw_entities(bufferFrame, commandBuffer, (int)level.modelTime);
+			sync_camera(ent1);
 
-				frame = frame + 0.1; 
-				level.framenum++;
-				level.time = level.framenum * 0.1f;
+			//frame = frame + 0.1;
+			//level.framenum++;
+			level.time += 0.1f;
+			if (state != GS_InGameMenu) {
+				level.modelTime += 0.1f;
+			}
 
-            gf3d_command_rendering_end(commandBuffer);
-
+			gf3d_command_rendering_end(commandBuffer);
+		}
+		else { //blank out the background (need to render nothing in model pipeline)
+			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
+			gf3d_command_rendering_end(commandBuffer);
+		}
 		// 2D overlay rendering
+
 		commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_overlay_pipeline());
 
-		mouseEle->position = vector2d(mousex, mousey);
-		gf3d_ui_draw_all((int)frame, bufferFrame, commandBuffer);
+		gf3d_ui_draw_all((int)level.time, bufferFrame, commandBuffer);
 
 		gf3d_command_rendering_end(commandBuffer);
 		gf3d_vgraphics_render_end(bufferFrame);
@@ -403,5 +433,9 @@ void check_death() {
 
 		i++;
 	}
+}
+
+void setupMainMenu() {
+
 }
 /*eol@eof*/

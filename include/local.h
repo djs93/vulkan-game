@@ -30,8 +30,8 @@ typedef enum
 
 // changes as each map is entered
 typedef struct {
-	int framenum;
 	float time;
+	float modelTime;
 	char level_name[32];
 	char mapname[32];
 	char nextmap[32];

@@ -53,7 +53,7 @@ void gf3d_ui_draw_all(int frame, Uint32 bufferFrame, VkCommandBuffer commandBuff
 	*/
 	//first in, furthest front method (aka the one we're using)
 	for (i = gf3d_ui.max_elements-1; i >= 0; i--) {
-		if (gf3d_ui.element_list[i].inuse) {
+		if (gf3d_ui.element_list[i].inuse && !gf3d_ui.element_list[i].hidden) {
 			gf3d_ui_draw(&gf3d_ui.element_list[i], frame, gf3d_ui.element_list[i].position, bufferFrame, commandBuffer);
 		}
 	}
@@ -77,7 +77,7 @@ UIElement* gf3d_ui_new()
 	return NULL;
 }
 
-void gf3d_ui_doClick(int mouseX, int mouseY)
+void gf3d_ui_doClick(int mouseX, int mouseY, UIElement* clicker)
 {
 	int i;
 	UIElement* clickyEle = NULL; //The element clicked
@@ -93,7 +93,7 @@ void gf3d_ui_doClick(int mouseX, int mouseY)
 		}
 	}
 	if (clickyEle) {
-		clickyEle->onClick(clickyEle);
+		clickyEle->onClick(clickyEle, clicker);
 	}
 }
 
