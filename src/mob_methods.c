@@ -11,8 +11,7 @@ void mushroom_think(Entity_T* self)
 void mushroom_touch(Entity_T* self, Entity_T* other)
 {
 	if (self->health != 0.0f && other == player) {
-		player->health += 10.0f;
-		slog("Player health now %f", player->health);
+		(int)player->data += 1;
 		self->health = 0.0f;
 	}
 }
@@ -291,6 +290,4 @@ void set_rotation(Matrix4 out, Matrix4 in, Vector3D theta) {
 	Rotate[3][3] = in[3][3];
 
 	gfc_matrix_copy(out, Rotate);
-
-
 }

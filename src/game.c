@@ -363,6 +363,7 @@ void setupLevelOne() {
 	ent1->nextthink = 0.1f;
 	ent1->model->boudningAdjustment.z = 1.2f;
 	ent1->type = "player";
+	ent1->data = 0;
 	save_entity_layout_json(player);
 
 	Entity_T* ent2 = modeled_entity_animated("ezreal", "Ezreal2", 0, 1);
@@ -391,6 +392,7 @@ void setupLevelOne() {
 	shroom1->die = mushroom_die;
 	shroom1->healthmax = 1.0f;
 	shroom1->health = shroom1->healthmax;
+	shroom1->type = "mushroom";
 
 	Entity_T* spring1 = modeled_entity("spring", "spring1");
 	teleport_entity(spring1, vector3d(-20, -40, -10));
