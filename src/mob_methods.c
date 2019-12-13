@@ -20,12 +20,12 @@ void mushroom_touch(Entity_T* self, Entity_T* other)
 		self->health = 0.0f;
 		UIElement* count = gf3d_ui_find("mushroom Count");
 		char str[14];
-		sprintf(str, "Mushrooms: %d", (int)player->data);
+		sprintf(str, "Grzyby: %d", (int)player->data);
 		count->sprite = gf3d_ui_getTextSprite(str, vector4d(255,255,255,255), 100);
 
 		UIElement* healthUI = gf3d_ui_find("health");
-		char str2[12];
-		sprintf(str2, "Health: %d", (int)player->health);
+		char str2[14];
+		sprintf(str2, "Zdrowie: %d", (int)player->health);
 		healthUI->sprite = gf3d_ui_getTextSprite(str2, vector4d(255, 255, 255, 255), 100);
 	}
 }
@@ -191,13 +191,20 @@ void jumper_think(Entity_T* self)
 void jumper_touch(Entity_T* self, Entity_T* other)
 {
 	//check for stomp
-	if (other==player && other->boundingBox.position.z - other->boundingBox.size.z + 0.1f > self->boundingBox.position.z + self->boundingBox.size.z) {
+	if (other==player && other->boundingBox.position.z - other->boundingBox.size.z + other->model->boudningAdjustment.z > self->boundingBox.position.z + self->boundingBox.size.z + self->model->boudningAdjustment.z) {
 		self->health = 0.0f;
 		self->movetype = MOVETYPE_NOCLIP;
 		teleport_entity(other, vector3d(other->position.x, other->position.y, other->position.z + 1.5f));
 		other->velocity.z = other->specFloat1;
 		other->groundentity = NULL;
 		return;
+	}
+	else if (other == player && self->velocity.z<0.0f &&fabsf(other->boundingBox.position.z + other->boundingBox.size.z - (self->boundingBox.position.z - self->boundingBox.size.z ))<0.2f) {
+		player->health -= 10.0f;
+		UIElement* healthUI = gf3d_ui_find("health");
+		char str2[14];
+		sprintf(str2, "Zdrowie: %d", (int)player->health);
+		healthUI->sprite = gf3d_ui_getTextSprite(str2, vector4d(255, 255, 255, 255), 100);
 	}
 }
 

@@ -469,10 +469,10 @@ void setupLevelOne() {
 	rotate_entity(pacer, GFC_HALF_PI, vector3d(0, 0, 1));
 
 	char str[14];
-	char str2[12];
+	char str2[14];
 
-	sprintf(str, "Mushrooms: %d", (int)player->data);
-	sprintf(str2, "Health: %d", (int)player->health);
+	sprintf(str, "Grzyby: %d", (int)player->data);
+	sprintf(str2, "Zdrowie: %d", (int)player->health);
 
 	UIElement* mushroomCount = gf3d_ui_placeText(str, 10, 10, vector4d(255, 255, 255, 255), 100);
 	mushroomCount->name = "mushroom Count";
