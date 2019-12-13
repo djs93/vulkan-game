@@ -32,6 +32,7 @@ void gf3d_ui_free(UIElement* element);
 void gf3d_ui_free_all_but_mouse();
 void gf3d_ui_doClick(int mouseX, int mouseY, UIElement* clicker);
 UIElement* gf3d_ui_placeText(char* text, int posX, int posY, Vector4D color, int fontSize);
+Sprite* gf3d_ui_getTextSprite(char* text, Vector4D color, int fontSize);
 UIElement* gf3d_ui_find(char* name);
 
 #endif

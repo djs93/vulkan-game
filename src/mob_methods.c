@@ -1,5 +1,6 @@
 #include "mob_methods.h"
 #include "simple_logger.h"
+#include "gf3d_ui.h"
 
 void set_rotation(Matrix4 out, Matrix4 in, Vector3D theta);
 void mushroom_think(Entity_T* self)
@@ -10,9 +11,14 @@ void mushroom_think(Entity_T* self)
 
 void mushroom_touch(Entity_T* self, Entity_T* other)
 {
-	if (self->health != 0.0f && other == player) {
+	if (other == player && self->health != 0.0f) {
 		(int)player->data += 1;
+		player->health += 10;
 		self->health = 0.0f;
+		UIElement* count = gf3d_ui_find("mushroom Count");
+		char str[14];
+		sprintf(str, "Mushrooms: %d", (int)player->data);
+		count->sprite = gf3d_ui_getTextSprite(str, vector4d(255,255,255,255), 100);
 	}
 }
 

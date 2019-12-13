@@ -228,13 +228,13 @@ int main(int argc,char *argv[])
 			}
 
 			update_physics_positions();
-			update_physics_positions();
-			update_physics_positions();
-			update_physics_positions();
+			//update_physics_positions();
+			//update_physics_positions();
+			//update_physics_positions();
 			check_death();
-			check_death();
-			check_death();
-			check_death();
+			//check_death();
+			//check_death();
+			//check_death();
 		}
 
         // configure render command for graphics command pool
@@ -468,11 +468,11 @@ void setupLevelOne() {
 
 	rotate_entity(pacer, GFC_HALF_PI, vector3d(0, 0, 1));
 
-	char str[10];
+	char str[14];
 
-	sprintf(str, "%d", (int)player->data);
+	sprintf(str, "Mushrooms: %d", (int)player->data);
 
-	UIElement* mushroomCount = gf3d_ui_placeText(str, 0, 0, vector4d(255, 255, 255, 255), 100);
+	UIElement* mushroomCount = gf3d_ui_placeText(str, 10, 10, vector4d(255, 255, 255, 255), 100);
 	mushroomCount->name = "mushroom Count";
 
 	state = GS_InGame;

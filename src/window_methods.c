@@ -13,5 +13,5 @@ void testClick(UIElement* self, UIElement* mouseEle)
 void startButtonClick(UIElement* self, UIElement* mouseEle)
 {
 	mainMenuToLevelOne();
-	mouseEle->hidden;
+	mouseEle->hidden = true;
 }
