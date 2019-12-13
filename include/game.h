@@ -13,4 +13,7 @@ typedef enum
 	GS_InContentEditor = 3
 }GameState;
 
+GameState state;
+void mainMenuToLevelOne();
+
 #endif

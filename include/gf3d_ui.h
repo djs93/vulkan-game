@@ -27,6 +27,8 @@ void gf3d_ui_manager_close();
 void gf3d_ui_delete(UIElement* layer);
 void gf3d_ui_draw_all(int frame, Uint32 bufferFrame, VkCommandBuffer commandBuffer);
 UIElement* gf3d_ui_new();
+void gf3d_ui_free(UIElement* element);
+void gf3d_ui_free_all_but_mouse();
 void gf3d_ui_doClick(int mouseX, int mouseY, UIElement* clicker);
 UIElement* gf3d_ui_placeText(char* text, int posX, int posY, Vector4D color, int fontSize);
 

@@ -22,11 +22,14 @@
 level_locals level;
 Entity_T* entity_list;
 Entity_T* player;
+int window_width;
+int window_height;
 void draw_entities();
 void sync_camera();
 void setupMainMenu();
 void TestThink(Entity_T* self);
 void check_death();
+void setupLevelOne();
 
 int main(int argc,char *argv[])
 {
@@ -45,6 +48,8 @@ int main(int argc,char *argv[])
     Model *model2;
 	Vector3D testvec = vector3d(1.f, 0.f, 0.f);
 	SDL_Event event;
+	window_width = 1600;
+	window_height = 900;
     
     for (a = 1; a < argc;a++)
     {
@@ -66,8 +71,8 @@ int main(int argc,char *argv[])
     slog("gf3d begin");
     gf3d_vgraphics_init(
         "gf3d",                 //program name
-        1600,                   //screen width
-        900,                    //screen height
+		window_width,           //screen width
+		window_height,          //screen height
         vector4d(0.51,0.75,1,1),//background color
         0,                      //fullscreen
         validate,               //validation
@@ -78,12 +83,272 @@ int main(int argc,char *argv[])
     // main game loop
     slog("gf3d main loop begin");
 
-	GameState state = GS_MainMenu;
+	state = GS_MainMenu;
 
 	// set up entities
 	#pragma region set up entities
 	gf3d_entity_manager_init(ENTITY_MAX);
 	gf3d_ui_manager_init(UI_MAX);
+	
+	Sprite* mouse = NULL;
+	int mousex, mousey;
+	mouse = gf3d_sprite_load("images/pointer.png", 32, 32, 16);
+	UIElement* mouseEle = gf3d_ui_new();
+	mouseEle->sprite = mouse;
+
+	/*
+	UIElement* testBox = gf3d_ui_new();
+	testBox->sprite = gf3d_sprite_load("images/ground.png", -1, -1, 1);
+	testBox->onClick = testClick;
+	testBox->position = vector2d(300, 300);
+	*/
+
+	#pragma endregion
+	float accel = 15.0f;
+	TTF_Init();
+	setupMainMenu();
+    while(!done)
+    {
+        SDL_PumpEvents();   // update SDL's internal event structures
+		SDL_GetMouseState(&mousex, &mousey);
+		keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
+
+		if (state == GS_MainMenu || state == GS_InGameMenu) {
+			while (SDL_PollEvent(&event)) {
+				switch (event.type) {
+				case SDL_MOUSEBUTTONDOWN:
+					if (event.button.button == SDL_BUTTON_LEFT) {
+						gf3d_ui_doClick(mousex, mousey, mouseEle);
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			mouseEle->position = vector2d(mousex, mousey);
+		}
+		else if (state == GS_InGame) {
+			while (SDL_PollEvent(&event)) {
+				switch (event.type) {
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.scancode) {
+					case(SDL_SCANCODE_D):
+						if (abs(player->acceleration.x - accel) <= accel) {
+							player->acceleration.x -= accel;
+						}
+						break;
+					case(SDL_SCANCODE_A):
+						if (abs(player->acceleration.x + accel) <= accel) {
+							player->acceleration.x += accel;
+						}
+						break;
+					case(SDL_SCANCODE_W):
+						if (abs(player->acceleration.y - accel) <= accel) {
+							player->acceleration.y -= accel;
+						}
+						break;
+					case(SDL_SCANCODE_S):
+						if (abs(player->acceleration.y + accel) <= accel) {
+							player->acceleration.y += accel;
+						}
+						break;
+					case(SDL_SCANCODE_LSHIFT):
+						if (!(player->flags & FL_SPRINTING)) {
+							slog("Set sprint");
+							player->maxspeed.x = player->maxspeed.x * 2;
+							player->maxspeed.y = player->maxspeed.y * 2;
+							int combo = player->flags | FL_SPRINTING;
+							player->flags = combo;
+						}
+						break;
+					default:
+						break;
+					}
+					break;
+				case SDL_KEYUP:
+					switch (event.key.keysym.scancode) {
+					case(SDL_SCANCODE_D):
+						if (abs(player->acceleration.x + accel) <= accel) {
+							player->acceleration.x += accel;
+						}
+						break;
+					case(SDL_SCANCODE_A):
+						if (abs(player->acceleration.x - accel) <= accel) {
+							player->acceleration.x -= accel;
+						}
+						break;
+					case(SDL_SCANCODE_W):
+						if (abs(player->acceleration.y + accel) <= accel) {
+							player->acceleration.y += accel;
+						}
+						break;
+					case(SDL_SCANCODE_S):
+						if (abs(player->acceleration.y - accel) <= accel) {
+							player->acceleration.y -= accel;
+						}
+						break;
+					case(SDL_SCANCODE_LSHIFT):
+						if (player->flags & FL_SPRINTING) {
+							slog("Unset sprint");
+							player->maxspeed.x = player->maxspeed.x / 2;
+							player->maxspeed.y = player->maxspeed.y / 2;
+							int combo = player->flags & ~FL_SPRINTING;
+							player->flags = combo;
+						}
+						break;
+					default:
+						break;
+					}
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					if (event.button.button == SDL_BUTTON_LEFT) {
+						gf3d_ui_doClick(mousex, mousey, mouseEle);
+					}
+					break;
+				default:
+					break;
+				}
+			}
+
+			if (keys[SDL_SCANCODE_D] && keys[SDL_SCANCODE_A]) {
+				player->acceleration.x = 0.0f;
+			}
+			if (keys[SDL_SCANCODE_W] && keys[SDL_SCANCODE_S]) {
+				player->acceleration.y = 0.0f;
+			}
+			if (keys[SDL_SCANCODE_SPACE] && !(player->flags & FL_JUMPING)) {
+				player->velocity.z = player->specFloat1;
+				int combo = player->flags | FL_JUMPING;
+				player->flags = combo;
+			}
+			if (keys[SDL_SCANCODE_RIGHT]) {
+				rotate_entity(player, -0.01f, vector3d(0, 0, 1));
+				gfc_matrix_slog(player->modelMat);
+			}
+
+			update_physics_positions();
+			update_physics_positions();
+			update_physics_positions();
+			update_physics_positions();
+			check_death();
+			check_death();
+			check_death();
+			check_death();
+		}
+
+        // configure render command for graphics command pool
+        // for each mesh, get a command and configure it from the pool
+        bufferFrame = gf3d_vgraphics_render_begin();
+		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_overlay_pipeline(), bufferFrame);
+		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_model_pipeline(), bufferFrame);
+
+		if (state != GS_MainMenu) {
+			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
+
+			draw_entities(bufferFrame, commandBuffer, (int)level.modelTime);
+			sync_camera(player);
+
+			//frame = frame + 0.1;
+			//level.framenum++;
+			level.time += 0.1f;
+			if (state != GS_InGameMenu) {
+				level.modelTime += 0.1f;
+			}
+
+			gf3d_command_rendering_end(commandBuffer);
+		}
+		else { //blank out the background (need to render nothing in model pipeline)
+			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
+			gf3d_command_rendering_end(commandBuffer);
+			level.time += 0.1f;
+		}
+		// 2D overlay rendering
+
+		commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_overlay_pipeline());
+
+		gf3d_ui_draw_all((int)level.time, bufferFrame, commandBuffer);
+
+		gf3d_command_rendering_end(commandBuffer);
+		gf3d_vgraphics_render_end(bufferFrame);
+
+        if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
+    }    
+    
+    vkDeviceWaitIdle(gf3d_vgraphics_get_default_logical_device());    
+    //cleanup
+    slog("gf3d program end");
+    slog_sync();
+    return 0;
+}
+
+void TestThink(Entity_T* self) {
+	//slog("My name is %s", self->name);
+	rotate_entity(self, 0.01, vector3d(0, 0, 1));
+	self->nextthink = 0.1f;
+}
+
+void draw_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame) {
+	int i = 0;
+	Entity_T* ent;
+	while (i < gf3d_entity_manager.entity_max) {
+		ent = &entity_list[i];
+		if (ent->_inuse == 0) {
+			i++;
+			continue;
+		}
+
+		if (ent->model) {
+			gf3d_model_draw(ent->model, bufferFrame, commandBuffer, ent->modelMat, (Uint32)frame%ent->model->frameCount);
+		}
+
+		i++;
+	}
+}
+
+void sync_camera(Entity_T* ent) {
+	Vector3D pos;
+	vector3d_add(pos, ent->boundingBox.position, vector3d(5, 60, 15));
+	gf3d_vgraphics_set_camera_pos(pos, ent->boundingBox.position, vector3d(0,0,1));
+}
+
+void check_death() {
+	int i = 0;
+	Entity_T* ent;
+	while (i < gf3d_entity_manager.entity_max) {
+		ent = &entity_list[i];
+		if (ent->_inuse == 0) {
+			i++;
+			continue;
+		}
+
+		if (ent->healthmax>0.0f && ent->die && ent->health<=0.0f) {
+			ent->die(ent);
+		}
+
+		i++;
+	}
+}
+
+void setupMainMenu() {
+	UIElement* titleText = gf3d_ui_placeText("Vulkan Sux (JK)", 0, 50, vector4d(255, 255, 255, 255), 250);
+	titleText->position.x = window_width/2 - titleText->sprite->frameWidth / 4;
+
+	UIElement* startButton = gf3d_ui_placeText("Start", 0, 700, vector4d(95, 100, 99, 255), 250);
+	startButton->position.x = window_width / 2 - startButton->sprite->frameWidth / 4;
+	startButton->onClick = startButtonClick;
+
+	UIElement* bg1 = gf3d_ui_new();
+	bg1->sprite = gf3d_sprite_load("images/title bg.png", -1, -1, 1);
+	bg1->position = vector2d(0, 0);
+}
+
+void mainMenuToLevelOne()
+{
+	setupLevelOne();
+	gf3d_ui_free_all_but_mouse();
+}
+
+void setupLevelOne() {
 	Entity_T* ent1 = modeled_entity_animated("teemo", "player", 0, 17);
 	player = ent1;
 	ent1->movetype = MOVETYPE_STEP;
@@ -92,7 +357,7 @@ int main(int argc,char *argv[])
 	ent1->boundingBox.size.z *= 0.86f;
 	ent1->boundingBox.size.x *= 0.70f;
 	ent1->boundingBox.size.y *= 0.70f;
-	ent1->maxspeed = vector3d(1000.0f,1000.0f,10000.0f);
+	ent1->maxspeed = vector3d(1000.0f, 1000.0f, 10000.0f);
 	ent1->specFloat1 = 2000.0f;
 	ent1->think = player_think;
 	ent1->nextthink = 0.1f;
@@ -192,7 +457,7 @@ int main(int argc,char *argv[])
 	circler->think = circler_think;
 	circler->nextthink = 0.1f;
 	circler->touch = circler_touch;
-	circler->die = circler_die;	
+	circler->die = circler_die;
 
 	teleport_entity(pacer, vector3d(20, 20, 0));
 	teleport_entity(jumper, vector3d(60, -40, 20));
@@ -200,245 +465,6 @@ int main(int argc,char *argv[])
 
 	rotate_entity(pacer, GFC_HALF_PI, vector3d(0, 0, 1));
 
-	Sprite* mouse = NULL;
-	int mousex, mousey;
-	mouse = gf3d_sprite_load("images/pointer.png", 32, 32, 16);
-	
-	UIElement* mouseEle = gf3d_ui_new();
-	mouseEle->sprite = mouse;
-
-	UIElement* testBox = gf3d_ui_new();
-	testBox->sprite = gf3d_sprite_load("images/ground.png", -1, -1, 1);
-	testBox->onClick = testClick;
-	testBox->position = vector2d(300, 300);
-
-	#pragma endregion
-	float accel = 15.0f;
-	TTF_Init();
-	setupMainMenu();
-    while(!done)
-    {
-        SDL_PumpEvents();   // update SDL's internal event structures
-		SDL_GetMouseState(&mousex, &mousey);
-		keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
-
-		if (state == GS_MainMenu || state == GS_InGameMenu) {
-			while (SDL_PollEvent(&event)) {
-				switch (event.type) {
-				case SDL_MOUSEBUTTONDOWN:
-					if (event.button.button == SDL_BUTTON_LEFT) {
-						gf3d_ui_doClick(mousex, mousey, mouseEle);
-					}
-					break;
-				default:
-					break;
-				}
-			}
-			mouseEle->position = vector2d(mousex, mousey);
-		}
-		else if (state == GS_InGame) {
-			while (SDL_PollEvent(&event)) {
-				switch (event.type) {
-				case SDL_KEYDOWN:
-					switch (event.key.keysym.scancode) {
-					case(SDL_SCANCODE_D):
-						if (abs(ent1->acceleration.x - accel) <= accel) {
-							ent1->acceleration.x -= accel;
-						}
-						break;
-					case(SDL_SCANCODE_A):
-						if (abs(ent1->acceleration.x + accel) <= accel) {
-							ent1->acceleration.x += accel;
-						}
-						break;
-					case(SDL_SCANCODE_W):
-						if (abs(ent1->acceleration.y - accel) <= accel) {
-							ent1->acceleration.y -= accel;
-						}
-						break;
-					case(SDL_SCANCODE_S):
-						if (abs(ent1->acceleration.y + accel) <= accel) {
-							ent1->acceleration.y += accel;
-						}
-						break;
-					case(SDL_SCANCODE_LSHIFT):
-						if (!(player->flags & FL_SPRINTING)) {
-							slog("Set sprint");
-							player->maxspeed.x = player->maxspeed.x * 2;
-							player->maxspeed.y = player->maxspeed.y * 2;
-							int combo = player->flags | FL_SPRINTING;
-							player->flags = combo;
-						}
-						break;
-					default:
-						break;
-					}
-					break;
-				case SDL_KEYUP:
-					switch (event.key.keysym.scancode) {
-					case(SDL_SCANCODE_D):
-						if (abs(ent1->acceleration.x + accel) <= accel) {
-							ent1->acceleration.x += accel;
-						}
-						break;
-					case(SDL_SCANCODE_A):
-						if (abs(ent1->acceleration.x - accel) <= accel) {
-							ent1->acceleration.x -= accel;
-						}
-						break;
-					case(SDL_SCANCODE_W):
-						if (abs(ent1->acceleration.y + accel) <= accel) {
-							ent1->acceleration.y += accel;
-						}
-						break;
-					case(SDL_SCANCODE_S):
-						if (abs(ent1->acceleration.y - accel) <= accel) {
-							ent1->acceleration.y -= accel;
-						}
-						break;
-					case(SDL_SCANCODE_LSHIFT):
-						if (player->flags & FL_SPRINTING) {
-							slog("Unset sprint");
-							player->maxspeed.x = player->maxspeed.x / 2;
-							player->maxspeed.y = player->maxspeed.y / 2;
-							int combo = player->flags & ~FL_SPRINTING;
-							player->flags = combo;
-						}
-						break;
-					default:
-						break;
-					}
-					break;
-				case SDL_MOUSEBUTTONDOWN:
-					if (event.button.button == SDL_BUTTON_LEFT) {
-						gf3d_ui_doClick(mousex, mousey, mouseEle);
-					}
-					break;
-				default:
-					break;
-				}
-			}
-
-			if (keys[SDL_SCANCODE_D] && keys[SDL_SCANCODE_A]) {
-				ent1->acceleration.x = 0.0f;
-			}
-			if (keys[SDL_SCANCODE_W] && keys[SDL_SCANCODE_S]) {
-				ent1->acceleration.y = 0.0f;
-			}
-			if (keys[SDL_SCANCODE_SPACE] && !(ent1->flags & FL_JUMPING)) {
-				ent1->velocity.z = ent1->specFloat1;
-				int combo = ent1->flags | FL_JUMPING;
-				ent1->flags = combo;
-			}
-			if (keys[SDL_SCANCODE_RIGHT]) {
-				rotate_entity(player, -0.01f, vector3d(0, 0, 1));
-				gfc_matrix_slog(player->modelMat);
-			}
-
-			update_physics_positions();
-			update_physics_positions();
-			update_physics_positions();
-			update_physics_positions();
-			check_death();
-			check_death();
-			check_death();
-			check_death();
-		}
-
-        // configure render command for graphics command pool
-        // for each mesh, get a command and configure it from the pool
-        bufferFrame = gf3d_vgraphics_render_begin();
-		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_overlay_pipeline(), bufferFrame);
-		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_model_pipeline(), bufferFrame);
-
-		if (state != GS_MainMenu) {
-			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
-
-			draw_entities(bufferFrame, commandBuffer, (int)level.modelTime);
-			sync_camera(ent1);
-
-			//frame = frame + 0.1;
-			//level.framenum++;
-			level.time += 0.1f;
-			if (state != GS_InGameMenu) {
-				level.modelTime += 0.1f;
-			}
-
-			gf3d_command_rendering_end(commandBuffer);
-		}
-		else { //blank out the background (need to render nothing in model pipeline)
-			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
-			gf3d_command_rendering_end(commandBuffer);
-			level.time += 0.1f;
-		}
-		// 2D overlay rendering
-
-		commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_overlay_pipeline());
-
-		gf3d_ui_draw_all((int)level.time, bufferFrame, commandBuffer);
-
-		gf3d_command_rendering_end(commandBuffer);
-		gf3d_vgraphics_render_end(bufferFrame);
-
-        if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
-    }    
-    
-    vkDeviceWaitIdle(gf3d_vgraphics_get_default_logical_device());    
-    //cleanup
-    slog("gf3d program end");
-    slog_sync();
-    return 0;
-}
-
-void TestThink(Entity_T* self) {
-	//slog("My name is %s", self->name);
-	rotate_entity(self, 0.01, vector3d(0, 0, 1));
-	self->nextthink = 0.1f;
-}
-
-void draw_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame) {
-	int i = 0;
-	Entity_T* ent;
-	while (i < gf3d_entity_manager.entity_max) {
-		ent = &entity_list[i];
-		if (ent->_inuse == 0) {
-			i++;
-			continue;
-		}
-
-		if (ent->model) {
-			gf3d_model_draw(ent->model, bufferFrame, commandBuffer, ent->modelMat, (Uint32)frame%ent->model->frameCount);
-		}
-
-		i++;
-	}
-}
-
-void sync_camera(Entity_T* ent) {
-	Vector3D pos;
-	vector3d_add(pos, ent->boundingBox.position, vector3d(5, 60, 15));
-	gf3d_vgraphics_set_camera_pos(pos, ent->boundingBox.position, vector3d(0,0,1));
-}
-
-void check_death() {
-	int i = 0;
-	Entity_T* ent;
-	while (i < gf3d_entity_manager.entity_max) {
-		ent = &entity_list[i];
-		if (ent->_inuse == 0) {
-			i++;
-			continue;
-		}
-
-		if (ent->healthmax>0.0f && ent->die && ent->health<=0.0f) {
-			ent->die(ent);
-		}
-
-		i++;
-	}
-}
-
-void setupMainMenu() {
-	gf3d_ui_placeText("Test", 300, 300, vector4d(255, 255, 255, 255), 100);
+	state = GS_InGame;
 }
 /*eol@eof*/

@@ -77,11 +77,26 @@ UIElement* gf3d_ui_new()
 	return NULL;
 }
 
+void gf3d_ui_free(UIElement* element)
+{
+	gf3d_sprite_free(element->sprite);
+	memset(element, 0, sizeof(UIElement));
+}
+
+void gf3d_ui_free_all_but_mouse()
+{
+	int i;
+	//get rid of all main menu elements, we don't need them anymore
+	for (i = 1; i < gf3d_ui.max_elements; i++) {
+		gf3d_ui_free(&gf3d_ui.element_list[i]);
+	}
+}
+
 void gf3d_ui_doClick(int mouseX, int mouseY, UIElement* clicker)
 {
 	int i;
 	UIElement* clickyEle = NULL; //The element clicked
-	for (i = 0; i < gf3d_ui.max_elements; i++)
+	for (i = gf3d_ui.max_elements-1; i >=0 ; i--)
 	{
 		UIElement* currentEle = &gf3d_ui.element_list[i];
 		if (!currentEle->inuse)continue;
