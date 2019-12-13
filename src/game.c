@@ -330,10 +330,10 @@ void check_death() {
 }
 
 void setupMainMenu() {
-	UIElement* titleText = gf3d_ui_placeText("Vulkan Sux (JK)", 0, 50, vector4d(255, 255, 255, 255), 250);
+	UIElement* titleText = gf3d_ui_placeText("Gra Vulkan", 0, 50, vector4d(255, 255, 255, 255), 250);
 	titleText->position.x = window_width/2 - titleText->sprite->frameWidth / 4;
 
-	UIElement* startButton = gf3d_ui_placeText("Start", 0, 700, vector4d(95, 100, 99, 255), 250);
+	UIElement* startButton = gf3d_ui_placeText("Zaczynac", 0, 700, vector4d(95, 100, 99, 255), 250);
 	startButton->position.x = window_width / 2 - startButton->sprite->frameWidth / 4;
 	startButton->onClick = startButtonClick;
 
