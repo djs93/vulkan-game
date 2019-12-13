@@ -11,6 +11,7 @@ typedef struct UIElement_S
 	Sprite* sprite;
 	void (*onClick)(struct UIElement_S* self, struct UIElement_S* clicker);
 	Vector2D position;
+	char* name;
 }UIElement;
 
 typedef struct
@@ -31,5 +32,6 @@ void gf3d_ui_free(UIElement* element);
 void gf3d_ui_free_all_but_mouse();
 void gf3d_ui_doClick(int mouseX, int mouseY, UIElement* clicker);
 UIElement* gf3d_ui_placeText(char* text, int posX, int posY, Vector4D color, int fontSize);
+UIElement* gf3d_ui_find(char* name);
 
 #endif

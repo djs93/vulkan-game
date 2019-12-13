@@ -128,3 +128,15 @@ UIElement* gf3d_ui_placeText(char* text, int posX, int posY, Vector4D color, int
 	text_element->position.y = posY;
 	return text_element;
 }
+
+UIElement* gf3d_ui_find(char* name)
+{
+	int i;
+	for (i = 0; i < gf3d_ui.max_elements; i++)
+	{
+		if (strcmp(gf3d_ui.element_list[i].name, name)==0) {
+			return &gf3d_ui.element_list[i];
+		}
+	}
+	return NULL;
+}

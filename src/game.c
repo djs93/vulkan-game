@@ -95,6 +95,7 @@ int main(int argc,char *argv[])
 	mouse = gf3d_sprite_load("images/pointer.png", 32, 32, 16);
 	UIElement* mouseEle = gf3d_ui_new();
 	mouseEle->sprite = mouse;
+	mouseEle->name = "mouse";
 
 	/*
 	UIElement* testBox = gf3d_ui_new();
@@ -344,8 +345,8 @@ void setupMainMenu() {
 
 void mainMenuToLevelOne()
 {
-	setupLevelOne();
 	gf3d_ui_free_all_but_mouse();
+	setupLevelOne();
 }
 
 void setupLevelOne() {
@@ -466,6 +467,13 @@ void setupLevelOne() {
 	teleport_entity(circler, vector3d(-60, 40, 0));
 
 	rotate_entity(pacer, GFC_HALF_PI, vector3d(0, 0, 1));
+
+	char str[10];
+
+	sprintf(str, "%d", (int)player->data);
+
+	UIElement* mushroomCount = gf3d_ui_placeText(str, 0, 0, vector4d(255, 255, 255, 255), 100);
+	mushroomCount->name = "mushroom Count";
 
 	state = GS_InGame;
 }
