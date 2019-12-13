@@ -469,11 +469,17 @@ void setupLevelOne() {
 	rotate_entity(pacer, GFC_HALF_PI, vector3d(0, 0, 1));
 
 	char str[14];
+	char str2[12];
 
 	sprintf(str, "Mushrooms: %d", (int)player->data);
+	sprintf(str2, "Health: %d", (int)player->health);
 
 	UIElement* mushroomCount = gf3d_ui_placeText(str, 10, 10, vector4d(255, 255, 255, 255), 100);
 	mushroomCount->name = "mushroom Count";
+
+	UIElement* healthUI = gf3d_ui_placeText(str2, 10, 10, vector4d(255, 255, 255, 255), 100);
+	healthUI->position.x = window_width - healthUI->sprite->frameWidth/2 - 10;
+	healthUI->name = "health";
 
 	state = GS_InGame;
 }

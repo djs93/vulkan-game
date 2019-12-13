@@ -14,11 +14,19 @@ void mushroom_touch(Entity_T* self, Entity_T* other)
 	if (other == player && self->health != 0.0f) {
 		(int)player->data += 1;
 		player->health += 10;
+		if (player->health > player->healthmax) {
+			player->health = player->healthmax;
+		}
 		self->health = 0.0f;
 		UIElement* count = gf3d_ui_find("mushroom Count");
 		char str[14];
 		sprintf(str, "Mushrooms: %d", (int)player->data);
 		count->sprite = gf3d_ui_getTextSprite(str, vector4d(255,255,255,255), 100);
+
+		UIElement* healthUI = gf3d_ui_find("health");
+		char str2[12];
+		sprintf(str2, "Health: %d", (int)player->health);
+		healthUI->sprite = gf3d_ui_getTextSprite(str2, vector4d(255, 255, 255, 255), 100);
 	}
 }
 
