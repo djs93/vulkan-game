@@ -1,7 +1,7 @@
 #ifndef __GAME_H__
 #define __GAME_H__
 
-#define ENTITY_MAX 12
+#define ENTITY_MAX 30
 #define UI_MAX 15
 typedef struct Entity_S Entity_T;
 

@@ -367,19 +367,21 @@ void setupLevelOne() {
 	ent1->data = 0;
 	save_entity_layout_json(player);
 
-	Entity_T* ent2 = modeled_entity_animated("ezreal", "Ezreal2", 0, 1);
-	ent2->movetype = MOVETYPE_STEP;
-	ent2->think = TestThink;
-	ent2->nextthink = 0.1f;
-	ent2->maxspeed = vector3d(0.0f, 0.0f, 10000.0f);
-	ent2->model->boudningAdjustment.z = -1.5f;
+	//Entity_T* ent2 = modeled_entity_animated("ezreal", "Ezreal2", 0, 1);
+	//ent2->movetype = MOVETYPE_STEP;
+	//ent2->think = TestThink;
+	//ent2->nextthink = 0.1f;
+	//ent2->maxspeed = vector3d(0.0f, 0.0f, 10000.0f);
+	//ent2->model->boudningAdjustment.z = -1.5f;
 
 	Entity_T* ent3 = modeled_entity("ground", "ground");
+	Entity_T* ground2 = modeled_entity("ground", "ground2");
 	Entity_T* ent4 = modeled_entity("platform_one", "plat1");
 	Entity_T* ent5 = modeled_entity("platform_one", "plat2");
 	Entity_T* ent6 = modeled_entity("platform_one", "plat3");
-	teleport_entity(ent2, vector3d(20, 0, 0));
+	//teleport_entity(ent2, vector3d(20, 0, 0));
 	teleport_entity(ent3, vector3d(0, 0, -19));
+	teleport_entity(ground2, vector3d(ground2->boundingBox.size.x*2, 0, -19));
 	teleport_entity(ent4, vector3d(20, -40, -10));
 	teleport_entity(ent5, vector3d(40, -40, 0));
 	teleport_entity(ent6, vector3d(60, -40, 10));
