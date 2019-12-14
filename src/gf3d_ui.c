@@ -102,7 +102,7 @@ void gf3d_ui_doClick(int mouseX, int mouseY, UIElement* clicker)
 		if (!currentEle->inuse)continue;
 		if (!currentEle->onClick)continue;
 		if (mouseX > currentEle->position.x && mouseX < currentEle->position.x + currentEle->sprite->frameWidth/2) {
-			if (mouseY > currentEle->position.y && mouseY < currentEle->position.y + currentEle->sprite->frameHeight/2) {
+			if (mouseY > currentEle->position.y && mouseY < currentEle->position.y + currentEle->sprite->frameHeight/2.4) {
 				clickyEle = currentEle;
 			}
 		}

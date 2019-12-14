@@ -15,5 +15,6 @@ typedef enum
 
 GameState state;
 void mainMenuToLevelOne();
+void mainMenuToContentEditor();
 
 #endif

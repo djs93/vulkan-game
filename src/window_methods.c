@@ -15,3 +15,10 @@ void startButtonClick(UIElement* self, UIElement* mouseEle)
 	mainMenuToLevelOne();
 	mouseEle->hidden = true;
 }
+
+
+void contentEditorButtonClick(UIElement* self, UIElement* mouseEle)
+{
+	mainMenuToContentEditor();
+	mouseEle->hidden = true;
+}

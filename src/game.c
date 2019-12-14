@@ -30,6 +30,7 @@ void setupMainMenu();
 void TestThink(Entity_T* self);
 void check_death();
 void setupLevelOne();
+void setupContentEditor();
 
 int main(int argc,char *argv[])
 {
@@ -338,6 +339,10 @@ void setupMainMenu() {
 	startButton->position.x = window_width / 2 - startButton->sprite->frameWidth / 4;
 	startButton->onClick = startButtonClick;
 
+	UIElement* contentButton = gf3d_ui_placeText("Edytor tresci", 0, 825, vector4d(95, 100, 99, 255), 100);
+	contentButton->position.x = window_width / 2 - contentButton->sprite->frameWidth / 4;
+	contentButton->onClick = contentEditorButtonClick;
+
 	UIElement* bg1 = gf3d_ui_new();
 	bg1->sprite = gf3d_sprite_load("images/title bg.png", -1, -1, 1);
 	bg1->position = vector2d(0, 0);
@@ -347,6 +352,11 @@ void mainMenuToLevelOne()
 {
 	gf3d_ui_free_all_but_mouse();
 	setupLevelOne();
+}
+
+void mainMenuToContentEditor() {
+	gf3d_ui_free_all_but_mouse();
+	setupContentEditor();
 }
 
 void setupLevelOne() {
@@ -484,5 +494,9 @@ void setupLevelOne() {
 	healthUI->name = "health";
 
 	state = GS_InGame;
+}
+
+void setupContentEditor() {
+
 }
 /*eol@eof*/
