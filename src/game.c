@@ -98,7 +98,7 @@ int main(int argc,char *argv[])
 	mouseEle->sprite = mouse;
 	mouseEle->name = "mouse";
 
-	Vector3D contentOffset = vector3d(50,50,50);
+	Vector3D contentOffset = vector3d(150,150,80);
 
 	/*
 	UIElement* testBox = gf3d_ui_new();
@@ -245,6 +245,7 @@ int main(int argc,char *argv[])
 			if (axes && axesAttach) {
 				Bool positionChanged = false;
 				Vector3D pos = axes->position;
+				Bool placeEntity = false;
 				while (SDL_PollEvent(&event)) {
 					switch (event.type) {
 					case SDL_KEYDOWN:
@@ -285,6 +286,9 @@ int main(int argc,char *argv[])
 							teleport_entity(axes, pos);
 							teleport_entity(axesAttach, pos);
 							break;
+						case(SDL_SCANCODE_SPACE):
+							placeEntity = true;
+							break;
 						default:
 							break;
 						}
@@ -302,7 +306,15 @@ int main(int argc,char *argv[])
 					char str[50];
 					sprintf(str, "Pozycja: %f, %f, %f", player->position.x, player->position.y, player->position.z);
 					gf3d_sprite_free(positionUI->sprite);
-					positionUI->sprite = gf3d_ui_getTextSprite(str, vector4d(255, 255, 255, 255), 75);
+					positionUI->sprite = gf3d_ui_getTextSprite(str, vector4d(200, 200, 200, 200), 75);
+				}
+				if (placeEntity) {
+					if (axesAttach->type) {
+						if (!find_entity("player")||strcmp(axesAttach->type, "player") != 0) {
+							Entity_T* placedEnt = gf3d_nonanimated_entity_copy(axesAttach);
+							teleport_entity(placedEnt, axesAttach->position);
+						}
+					}
 				}
 			}
 			mouseEle->position = vector2d(mousex, mousey);
@@ -579,50 +591,55 @@ void setupContentEditor() {
 	Entity_T* attach = modeled_entity("axes", "axes_attach");
 	attach->model = NULL;
 
-	UIElement* saveButton = gf3d_ui_placeText("Zapisac", 0, 5, vector4d(255,255,255,255), 75);
+	UIElement* saveButton = gf3d_ui_placeText("Zapisac", 0, 5, vector4d(200,200,200,200), 75);
 	saveButton->position.x = window_width / 2 - saveButton->sprite->frameWidth / 4;
 	saveButton->name = "save button";
 
 	char str[50];
 	sprintf(str, "Pozycja: %f, %f, %f", player->position.x, player->position.y, player->position.z);
-	UIElement* positionText = gf3d_ui_placeText(str, 5,5, vector4d(255,255,255,255), 75);
+	UIElement* positionText = gf3d_ui_placeText(str, 5,5, vector4d(200,200,200,200), 75);
 	positionText->name = "position";
 
-	UIElement* platSpawnButton = gf3d_ui_placeText("Platforma", 5, 5, vector4d(255, 255, 255, 255), 75);
+	UIElement* platSpawnButton = gf3d_ui_placeText("Platforma", 5, 5, vector4d(200,200,200,200), 75);
 	platSpawnButton->position.y = window_height - platSpawnButton->sprite->frameHeight / 2;
 	platSpawnButton->onClick = platformClick;
 
-	UIElement* playerSpawnButton = gf3d_ui_placeText("Odrodzenie gracza", 5,5, vector4d(255,255,255,255), 75);
+	UIElement* playerSpawnButton = gf3d_ui_placeText("Odrodzenie gracza", 5,5, vector4d(200,200,200,200), 75);
 	playerSpawnButton->position.y = platSpawnButton->position.y;
 	playerSpawnButton->position.x = platSpawnButton->position.x + platSpawnButton->sprite->frameWidth / 2 + 20;
 	playerSpawnButton->onClick = spawnClick;
 
-	UIElement* jumperSpawnButton = gf3d_ui_placeText("Skoczek", 5, 5, vector4d(255, 255, 255, 255), 75);
+	UIElement* groundSpawnButton = gf3d_ui_placeText("Ziemia", 5, 5, vector4d(200,200,200,200), 75);
+	groundSpawnButton->position.y = platSpawnButton->position.y;
+	groundSpawnButton->position.x = playerSpawnButton->position.x + playerSpawnButton->sprite->frameWidth / 2 + 20;
+	groundSpawnButton->onClick = groundClick;
+
+	UIElement* jumperSpawnButton = gf3d_ui_placeText("Skoczek", 5, 5, vector4d(200,200,200,200), 75);
 	jumperSpawnButton->position.y = window_height - jumperSpawnButton->sprite->frameHeight / 2;
 	jumperSpawnButton->position.x = window_width / 2 - jumperSpawnButton->sprite->frameWidth / 4;
 	jumperSpawnButton->onClick = jumperClick;
 
-	UIElement* pacerSpawnButton = gf3d_ui_placeText("Piechur", 5, 5, vector4d(255, 255, 255, 255), 75);
+	UIElement* pacerSpawnButton = gf3d_ui_placeText("Piechur", 5, 5, vector4d(200,200,200,200), 75);
 	pacerSpawnButton->position.y = jumperSpawnButton->position.y;
 	pacerSpawnButton->position.x = jumperSpawnButton->position.x + jumperSpawnButton->sprite->frameWidth/2 +20;
 	pacerSpawnButton->onClick = pacerClick;
 
-	UIElement* circlerSpawnButton = gf3d_ui_placeText("Krazy", 5, 5, vector4d(255, 255, 255, 255), 75);
+	UIElement* circlerSpawnButton = gf3d_ui_placeText("Krazy", 5, 5, vector4d(200,200,200,200), 75);
 	circlerSpawnButton->position.y = jumperSpawnButton->position.y;
 	circlerSpawnButton->position.x = jumperSpawnButton->position.x - circlerSpawnButton->sprite->frameWidth/2 - 20;
 	circlerSpawnButton->onClick = circlerClick;
 
-	UIElement* mushroomSpawnButton = gf3d_ui_placeText("Grzyb", 5, 5, vector4d(255, 255, 255, 255), 75);
+	UIElement* mushroomSpawnButton = gf3d_ui_placeText("Grzyb", 5, 5, vector4d(200,200,200,200), 75);
 	mushroomSpawnButton->position.y = window_height - mushroomSpawnButton->sprite->frameHeight / 2;
 	mushroomSpawnButton->position.x = window_width - mushroomSpawnButton->sprite->frameWidth / 2 - 5;
 	mushroomSpawnButton->onClick = mushroomClick;
 
-	UIElement* springSpawnButton = gf3d_ui_placeText("Sprezyna", 5, 5, vector4d(255, 255, 255, 255), 75);
+	UIElement* springSpawnButton = gf3d_ui_placeText("Sprezyna", 5, 5, vector4d(200,200,200,200), 75);
 	springSpawnButton->position.y = mushroomSpawnButton->position.y;
 	springSpawnButton->position.x = mushroomSpawnButton->position.x - springSpawnButton->sprite->frameWidth / 2 -20;
 	springSpawnButton->onClick = springClick;
 
-	UIElement* speedSpawnButton = gf3d_ui_placeText("Predkosc", 5, 5, vector4d(255, 255, 255, 255), 75);
+	UIElement* speedSpawnButton = gf3d_ui_placeText("Predkosc", 5, 5, vector4d(200,200,200,200), 75);
 	speedSpawnButton->position.y = mushroomSpawnButton->position.y;
 	speedSpawnButton->position.x = springSpawnButton->position.x - speedSpawnButton->sprite->frameWidth / 2 - 20;
 	speedSpawnButton->onClick = speedClick;

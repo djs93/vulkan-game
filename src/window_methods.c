@@ -47,6 +47,15 @@ void spawnClick(UIElement* self, UIElement* mouseEle)
 	}
 }
 
+void groundClick(UIElement* self, UIElement* mouseEle)
+{
+	Entity_T* attachEnt = find_entity("axes_attach");
+	if (attachEnt) {
+		attachEnt->model = gf3d_model_load("ground");
+		attachEnt->type = "ground";
+	}
+}
+
 void jumperClick(UIElement* self, UIElement* mouseEle)
 {
 	Entity_T* attachEnt = find_entity("axes_attach");

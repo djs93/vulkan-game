@@ -101,6 +101,9 @@ void gf3d_texture_free(Texture *tex)
 {
     if ((!tex)||(!tex->_refcount))return;
     tex->_refcount--;
+	if (tex->_refcount == 0) {
+		gf3d_texture_delete(tex);
+	}
 }
 
 void gf3d_texture_delete_all()

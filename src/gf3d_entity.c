@@ -305,6 +305,24 @@ void save_entity_layout_json(Entity_T* entity)
 	free(fileName);
 }
 
+Entity_T* gf3d_nonanimated_entity_copy(Entity_T* entity)
+{
+	Entity_T* res = gf3d_entity_new();
+	res->model = gf3d_model_load(entity->model->filename);
+	res->model->texture = entity->model->texture;
+	res->type = entity->type;
+	if (strcmp(res->type, "player") == 0) {
+		res->name = "player";
+	}
+	else {
+		res->name = "copied entity";
+	}
+	Matrix4 modelMat;
+	gfc_matrix_identity(modelMat);
+	gfc_matrix_copy(res->modelMat, modelMat);
+	return res;
+}
+
 
 
 

@@ -127,6 +127,7 @@ Model * gf3d_model_load(char * filename)
 
     snprintf(assetname,GFCLINELEN,"images/%s.png",filename);
     model->texture = gf3d_texture_load(assetname);
+	snprintf(model->filename, GFCLINELEN, "%s", filename);
     
     return model;
 }

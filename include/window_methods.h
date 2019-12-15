@@ -8,6 +8,7 @@ void contentEditorButtonClick(UIElement* self, UIElement* mouseEle);
 void saveClick(UIElement* self, UIElement* mouseEle);
 void platformClick(UIElement* self, UIElement* mouseEle);
 void spawnClick(UIElement* self, UIElement* mouseEle);
+void groundClick(UIElement* self, UIElement* mouseEle);
 void jumperClick(UIElement* self, UIElement* mouseEle);
 void pacerClick(UIElement* self, UIElement* mouseEle);
 void circlerClick(UIElement* self, UIElement* mouseEle);

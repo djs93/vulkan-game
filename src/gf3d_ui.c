@@ -146,6 +146,7 @@ UIElement* gf3d_ui_find(char* name)
 	int i;
 	for (i = 0; i < gf3d_ui.max_elements; i++)
 	{
+		if (!gf3d_ui.element_list[i].name) { continue; }
 		if (strcmp(gf3d_ui.element_list[i].name, name)==0) {
 			return &gf3d_ui.element_list[i];
 		}

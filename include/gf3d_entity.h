@@ -96,4 +96,6 @@ Entity_T* load_entity_json(char* entityName);
 
 void save_entity_layout_json(Entity_T* entity);
 
+Entity_T* gf3d_nonanimated_entity_copy(Entity_T* entity);
+
 #endif
