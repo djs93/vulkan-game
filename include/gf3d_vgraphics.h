@@ -49,6 +49,7 @@ UniformBufferObject gf3d_vgraphics_get_uniform_buffer_object();
 
 Pipeline* gf3d_vgraphics_get_graphics_model_pipeline();
 Pipeline* gf3d_vgraphics_get_graphics_overlay_pipeline();
+Pipeline* gf3d_vgraphics_get_graphics_place_pipeline();
 
 Command* gf3d_vgraphics_get_graphics_command_pool();
 

@@ -58,6 +58,7 @@ Pipeline* gf3d_pipeline_graphics_load(VkDevice device, char* vertFile, char* fra
  * @returns NULL on error (see logs) or a pointer to a pipeline
  */
 Pipeline* gf3d_pipeline_basic_model_create(VkDevice device, char* vertFile, char* fragFile, VkExtent2D extent, Uint32 descriptorCount);
+Pipeline* gf3d_pipeline_basic_place_create(VkDevice device, char* vertFile, char* fragFile, VkExtent2D extent, Uint32 descriptorCount);
 Pipeline* gf3d_pipeline_basic_sprite_create(VkDevice device, char* vertFile, char* fragFile, VkExtent2D extent, Uint32 descriptorCount);
 
 /**

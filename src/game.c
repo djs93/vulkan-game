@@ -24,7 +24,8 @@ Entity_T* entity_list;
 Entity_T* player;
 int window_width;
 int window_height;
-void draw_entities();
+void draw_normal_entities();
+void draw_place_entities();
 void sync_camera(Entity_T * ent, Vector3D offset);
 void setupMainMenu();
 void TestThink(Entity_T* self);
@@ -325,11 +326,12 @@ int main(int argc,char *argv[])
         bufferFrame = gf3d_vgraphics_render_begin();
 		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_overlay_pipeline(), bufferFrame);
 		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_model_pipeline(), bufferFrame);
+		gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_place_pipeline(), bufferFrame);
 
 		if (state != GS_MainMenu) {
 			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
 
-			draw_entities(bufferFrame, commandBuffer, (int)level.modelTime);
+			draw_normal_entities(bufferFrame, commandBuffer, (int)level.modelTime);
 			if(player && state ==GS_InGame){
 				sync_camera(player, vector3d(5, 60, 15));
 			}
@@ -337,15 +339,21 @@ int main(int argc,char *argv[])
 				sync_camera(player, contentOffset);
 			}
 			
+			gf3d_command_rendering_end(commandBuffer);
 
+			//do place shader pipeline render here
+			if (state == GS_InContentEditor) {
+				commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_place_pipeline());
+				draw_place_entities(bufferFrame, commandBuffer, (int)level.modelTime);
+				gf3d_command_rendering_end(commandBuffer);
+			}
 			//frame = frame + 0.1;
 			//level.framenum++;
 			level.time += 0.1f;
-			if (state != GS_InGameMenu && state!=GS_InContentEditor) {
+			if (state != GS_InGameMenu && state != GS_InContentEditor) {
 				level.modelTime += 0.1f;
 			}
 
-			gf3d_command_rendering_end(commandBuffer);
 		}
 		else { //blank out the background (need to render nothing in model pipeline)
 			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
@@ -377,7 +385,7 @@ void TestThink(Entity_T* self) {
 	self->nextthink = 0.1f;
 }
 
-void draw_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame) {
+void draw_normal_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame) {
 	int i = 0;
 	Entity_T* ent;
 	while (i < gf3d_entity_manager.entity_max) {
@@ -388,7 +396,29 @@ void draw_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame)
 		}
 
 		if (ent->model) {
-			gf3d_model_draw(ent->model, bufferFrame, commandBuffer, ent->modelMat, (Uint32)frame%ent->model->frameCount);
+			if (!ent->name || strcmp(ent->name, "axes_attach") != 0) {
+				gf3d_model_draw(ent->model, bufferFrame, commandBuffer, ent->modelMat, (Uint32)frame % ent->model->frameCount);
+			}
+		}
+
+		i++;
+	}
+}
+
+void draw_place_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame) {
+	int i = 0;
+	Entity_T* ent;
+	while (i < gf3d_entity_manager.entity_max) {
+		ent = &entity_list[i];
+		if (ent->_inuse == 0) {
+			i++;
+			continue;
+		}
+
+		if (ent->model) {
+			if (ent->name && strcmp(ent->name, "axes_attach") == 0) {
+				gf3d_model_draw(ent->model, bufferFrame, commandBuffer, ent->modelMat, (Uint32)frame % ent->model->frameCount);
+			}
 		}
 
 		i++;

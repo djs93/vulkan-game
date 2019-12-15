@@ -64,6 +64,7 @@ typedef struct
         
 	Pipeline* model_pipe;     /**<for rendering 3d*/
 	Pipeline* overlay_pipe;   /**<for rendering 2d*/
+	Pipeline* place_pipe;
     
     Command                 *   graphicsCommandPool; 
     UniformBufferObject         ubo;
@@ -149,6 +150,7 @@ void gf3d_vgraphics_init(
     gf3d_pipeline_init(4);// how many different rendering pipelines we need
 	gf3d_vgraphics.model_pipe = gf3d_pipeline_basic_model_create(device, "shaders/vert.spv", "shaders/frag.spv", gf3d_vgraphics_get_view_extent(), 1024);
 	gf3d_vgraphics.overlay_pipe = gf3d_pipeline_basic_sprite_create(device, "shaders/sprite_vert.spv", "shaders/sprite_frag.spv", gf3d_vgraphics_get_view_extent(), 1024);
+	gf3d_vgraphics.place_pipe = gf3d_pipeline_basic_place_create(device, "shaders/place_vert.spv", "shaders/place_frag.spv", gf3d_vgraphics_get_view_extent(), 1024);
     gf3d_model_manager_init(1024,gf3d_swapchain_get_swap_image_count(),device);
 
     gf3d_command_system_init(8,device);
@@ -694,6 +696,11 @@ Pipeline *gf3d_vgraphics_get_graphics_model_pipeline()
 Pipeline *gf3d_vgraphics_get_graphics_overlay_pipeline()
 {
     return gf3d_vgraphics.overlay_pipe;
+}
+
+Pipeline* gf3d_vgraphics_get_graphics_place_pipeline()
+{
+	return gf3d_vgraphics.place_pipe;
 }
 
 Command *gf3d_vgraphics_get_graphics_command_pool()
