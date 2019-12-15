@@ -247,6 +247,7 @@ int main(int argc,char *argv[])
 				Bool positionChanged = false;
 				Vector3D pos = axes->position;
 				Bool placeEntity = false;
+				Bool deleteEntity = false;
 				while (SDL_PollEvent(&event)) {
 					switch (event.type) {
 					case SDL_KEYDOWN:
@@ -290,6 +291,9 @@ int main(int argc,char *argv[])
 						case(SDL_SCANCODE_SPACE):
 							placeEntity = true;
 							break;
+						case(SDL_SCANCODE_Z):
+							deleteEntity = true;
+							break;
 						default:
 							break;
 						}
@@ -315,6 +319,12 @@ int main(int argc,char *argv[])
 							Entity_T* placedEnt = gf3d_nonanimated_entity_copy(axesAttach);
 							teleport_entity(placedEnt, axesAttach->position);
 						}
+					}
+				}
+				if (deleteEntity) {
+					Entity_T* ent = get_last_entity();
+					if (ent->name && strcmp(ent->name, "axes")!=0 && strcmp(ent->name, "axes_attach") != 0) {
+						ent->_inuse = 0;
 					}
 				}
 			}

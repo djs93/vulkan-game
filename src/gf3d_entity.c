@@ -79,6 +79,17 @@ Entity_T* find_entity(char* name) {
 	return NULL;
 }
 
+Entity_T* get_last_entity() {
+	Entity_T* ent = NULL;
+	int i;
+	for (i = 0; i < gf3d_entity_manager.entity_max; i++)
+	{
+		if (!entity_list[i]._inuse)continue;
+		ent = &entity_list[i];
+	}
+	return ent;
+}
+
 EntityManager get_entity_manager() {
 	return gf3d_entity_manager;
 }

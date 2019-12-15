@@ -84,6 +84,7 @@ void    gf3d_entity_free(Entity_T *self);
 * @return the index of the entity in the entity list
 */
 Entity_T* find_entity(char* name);
+Entity_T* get_last_entity();
 
 void rotate_entity(Entity_T* entity, float radians, Vector3D axis);
 
