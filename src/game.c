@@ -52,6 +52,7 @@ int main(int argc,char *argv[])
 	SDL_Event event;
 	window_width = 1600;
 	window_height = 900;
+	float cameraSpeed = 0.7f;
     
     for (a = 1; a < argc;a++)
     {
@@ -293,6 +294,24 @@ int main(int argc,char *argv[])
 							break;
 						case(SDL_SCANCODE_Z):
 							deleteEntity = true;
+							break;
+						case(SDL_SCANCODE_J):
+							contentOffset.x -= cameraSpeed*2;
+							break;
+						case(SDL_SCANCODE_L):
+							contentOffset.x += cameraSpeed * 2;
+							break;
+						case(SDL_SCANCODE_I):
+							contentOffset.y += cameraSpeed * 2;
+							break;
+						case(SDL_SCANCODE_K):
+							contentOffset.y -= cameraSpeed * 2;
+							break;
+						case(SDL_SCANCODE_U):
+							contentOffset.z += cameraSpeed;
+							break;
+						case(SDL_SCANCODE_O):
+							contentOffset.z -= cameraSpeed;
 							break;
 						default:
 							break;
