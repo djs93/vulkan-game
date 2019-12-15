@@ -67,7 +67,7 @@ Entity_T* find_entity(char* name) {
 	Entity_T* from = entity_list;
 	if (!entity_list) {
 		slog("Tried to find entity before initializing entity list!");
-		return -1;
+		return NULL;
 	}
 	for (; from < &entity_list[gf3d_entity_manager.num_ents]; from++)
 	{
@@ -76,7 +76,7 @@ Entity_T* find_entity(char* name) {
 		if (!strcmp(from->name, name))
 			return from;
 	}
-	return -1;
+	return NULL;
 }
 
 EntityManager get_entity_manager() {

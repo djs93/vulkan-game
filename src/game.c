@@ -25,7 +25,7 @@ Entity_T* player;
 int window_width;
 int window_height;
 void draw_entities();
-void sync_camera();
+void sync_camera(Entity_T * ent, Vector3D offset);
 void setupMainMenu();
 void TestThink(Entity_T* self);
 void check_death();
@@ -98,6 +98,8 @@ int main(int argc,char *argv[])
 	mouseEle->sprite = mouse;
 	mouseEle->name = "mouse";
 
+	Vector3D contentOffset = vector3d(50,50,50);
+
 	/*
 	UIElement* testBox = gf3d_ui_new();
 	testBox->sprite = gf3d_sprite_load("images/ground.png", -1, -1, 1);
@@ -115,7 +117,7 @@ int main(int argc,char *argv[])
 		SDL_GetMouseState(&mousex, &mousey);
 		keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
 
-		if (state == GS_MainMenu || state == GS_InGameMenu) {
+		if (state != GS_InGame && state != GS_InContentEditor) {
 			while (SDL_PollEvent(&event)) {
 				switch (event.type) {
 				case SDL_MOUSEBUTTONDOWN:
@@ -237,6 +239,74 @@ int main(int argc,char *argv[])
 			//check_death();
 			//check_death();
 		}
+		else if (state == GS_InContentEditor) {
+			Entity_T* axes = find_entity("axes");
+			Entity_T* axesAttach = find_entity("axes_attach");
+			if (axes && axesAttach) {
+				Bool positionChanged = false;
+				Vector3D pos = axes->position;
+				while (SDL_PollEvent(&event)) {
+					switch (event.type) {
+					case SDL_KEYDOWN:
+						switch (event.key.keysym.scancode) {
+						case(SDL_SCANCODE_D):
+							positionChanged = true;
+							vector3d_add(pos, pos, vector3d(0.2, 0, 0));
+							teleport_entity(axes, pos);
+							teleport_entity(axesAttach, pos);
+							break;
+						case(SDL_SCANCODE_A):
+							positionChanged = true;
+							vector3d_add(pos, pos, vector3d(-0.2, 0, 0));
+							teleport_entity(axes, pos);
+							teleport_entity(axesAttach, pos);
+							break;
+						case(SDL_SCANCODE_W):
+							positionChanged = true;
+							vector3d_add(pos, pos, vector3d(0, 0.2, 0));
+							teleport_entity(axes, pos);
+							teleport_entity(axesAttach, pos);
+							break;
+						case(SDL_SCANCODE_S):
+							positionChanged = true;
+							vector3d_add(pos, pos, vector3d(0, -0.2, 0));
+							teleport_entity(axes, pos);
+							teleport_entity(axesAttach, pos);
+							break;
+						case(SDL_SCANCODE_Q):
+							positionChanged = true;
+							vector3d_add(pos, pos, vector3d(0, 0, -0.2));
+							teleport_entity(axes, pos);
+							teleport_entity(axesAttach, pos);
+							break;
+						case(SDL_SCANCODE_E):
+							positionChanged = true;
+							vector3d_add(pos, pos, vector3d(0, 0, 0.2));
+							teleport_entity(axes, pos);
+							teleport_entity(axesAttach, pos);
+							break;
+						default:
+							break;
+						}
+					case SDL_MOUSEBUTTONDOWN:
+						if (event.button.button == SDL_BUTTON_LEFT) {
+							gf3d_ui_doClick(mousex, mousey, mouseEle);
+						}
+						break;
+					default:
+						break;
+					}
+				}
+				if (positionChanged) {
+					UIElement* positionUI = gf3d_ui_find("position");
+					char str[50];
+					sprintf(str, "Pozycja: %f, %f, %f", player->position.x, player->position.y, player->position.z);
+					gf3d_sprite_free(positionUI->sprite);
+					positionUI->sprite = gf3d_ui_getTextSprite(str, vector4d(255, 255, 255, 255), 75);
+				}
+			}
+			mouseEle->position = vector2d(mousex, mousey);
+		}
 
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool
@@ -248,12 +318,18 @@ int main(int argc,char *argv[])
 			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
 
 			draw_entities(bufferFrame, commandBuffer, (int)level.modelTime);
-			sync_camera(player);
+			if(player && state ==GS_InGame){
+				sync_camera(player, vector3d(5, 60, 15));
+			}
+			else if(player && state==GS_InContentEditor) {
+				sync_camera(player, contentOffset);
+			}
+			
 
 			//frame = frame + 0.1;
 			//level.framenum++;
 			level.time += 0.1f;
-			if (state != GS_InGameMenu) {
+			if (state != GS_InGameMenu && state!=GS_InContentEditor) {
 				level.modelTime += 0.1f;
 			}
 
@@ -307,9 +383,9 @@ void draw_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame)
 	}
 }
 
-void sync_camera(Entity_T* ent) {
+void sync_camera(Entity_T* ent, Vector3D offset) {
 	Vector3D pos;
-	vector3d_add(pos, ent->boundingBox.position, vector3d(5, 60, 15));
+	vector3d_add(pos, ent->boundingBox.position, offset);
 	gf3d_vgraphics_set_camera_pos(pos, ent->boundingBox.position, vector3d(0,0,1));
 }
 
@@ -497,6 +573,60 @@ void setupLevelOne() {
 }
 
 void setupContentEditor() {
+	Entity_T* axis = modeled_entity("axes", "axes");
+	player = axis;
 
+	Entity_T* attach = modeled_entity("axes", "axes_attach");
+	attach->model = NULL;
+
+	UIElement* saveButton = gf3d_ui_placeText("Zapisac", 0, 5, vector4d(255,255,255,255), 75);
+	saveButton->position.x = window_width / 2 - saveButton->sprite->frameWidth / 4;
+	saveButton->name = "save button";
+
+	char str[50];
+	sprintf(str, "Pozycja: %f, %f, %f", player->position.x, player->position.y, player->position.z);
+	UIElement* positionText = gf3d_ui_placeText(str, 5,5, vector4d(255,255,255,255), 75);
+	positionText->name = "position";
+
+	UIElement* platSpawnButton = gf3d_ui_placeText("Platforma", 5, 5, vector4d(255, 255, 255, 255), 75);
+	platSpawnButton->position.y = window_height - platSpawnButton->sprite->frameHeight / 2;
+	platSpawnButton->onClick = platformClick;
+
+	UIElement* playerSpawnButton = gf3d_ui_placeText("Odrodzenie gracza", 5,5, vector4d(255,255,255,255), 75);
+	playerSpawnButton->position.y = platSpawnButton->position.y;
+	playerSpawnButton->position.x = platSpawnButton->position.x + platSpawnButton->sprite->frameWidth / 2 + 20;
+	playerSpawnButton->onClick = spawnClick;
+
+	UIElement* jumperSpawnButton = gf3d_ui_placeText("Skoczek", 5, 5, vector4d(255, 255, 255, 255), 75);
+	jumperSpawnButton->position.y = window_height - jumperSpawnButton->sprite->frameHeight / 2;
+	jumperSpawnButton->position.x = window_width / 2 - jumperSpawnButton->sprite->frameWidth / 4;
+	jumperSpawnButton->onClick = jumperClick;
+
+	UIElement* pacerSpawnButton = gf3d_ui_placeText("Piechur", 5, 5, vector4d(255, 255, 255, 255), 75);
+	pacerSpawnButton->position.y = jumperSpawnButton->position.y;
+	pacerSpawnButton->position.x = jumperSpawnButton->position.x + jumperSpawnButton->sprite->frameWidth/2 +20;
+	pacerSpawnButton->onClick = pacerClick;
+
+	UIElement* circlerSpawnButton = gf3d_ui_placeText("Krazy", 5, 5, vector4d(255, 255, 255, 255), 75);
+	circlerSpawnButton->position.y = jumperSpawnButton->position.y;
+	circlerSpawnButton->position.x = jumperSpawnButton->position.x - circlerSpawnButton->sprite->frameWidth/2 - 20;
+	circlerSpawnButton->onClick = circlerClick;
+
+	UIElement* mushroomSpawnButton = gf3d_ui_placeText("Grzyb", 5, 5, vector4d(255, 255, 255, 255), 75);
+	mushroomSpawnButton->position.y = window_height - mushroomSpawnButton->sprite->frameHeight / 2;
+	mushroomSpawnButton->position.x = window_width - mushroomSpawnButton->sprite->frameWidth / 2 - 5;
+	mushroomSpawnButton->onClick = mushroomClick;
+
+	UIElement* springSpawnButton = gf3d_ui_placeText("Sprezyna", 5, 5, vector4d(255, 255, 255, 255), 75);
+	springSpawnButton->position.y = mushroomSpawnButton->position.y;
+	springSpawnButton->position.x = mushroomSpawnButton->position.x - springSpawnButton->sprite->frameWidth / 2 -20;
+	springSpawnButton->onClick = springClick;
+
+	UIElement* speedSpawnButton = gf3d_ui_placeText("Predkosc", 5, 5, vector4d(255, 255, 255, 255), 75);
+	speedSpawnButton->position.y = mushroomSpawnButton->position.y;
+	speedSpawnButton->position.x = springSpawnButton->position.x - speedSpawnButton->sprite->frameWidth / 2 - 20;
+	speedSpawnButton->onClick = speedClick;
+
+	state = GS_InContentEditor;
 }
 /*eol@eof*/

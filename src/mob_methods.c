@@ -21,11 +21,13 @@ void mushroom_touch(Entity_T* self, Entity_T* other)
 		UIElement* count = gf3d_ui_find("mushroom Count");
 		char str[14];
 		sprintf(str, "Grzyby: %d", (int)player->data);
+		gf3d_sprite_free(count->sprite);
 		count->sprite = gf3d_ui_getTextSprite(str, vector4d(255,255,255,255), 100);
 
 		UIElement* healthUI = gf3d_ui_find("health");
 		char str2[14];
 		sprintf(str2, "Zdrowie: %d", (int)player->health);
+		gf3d_sprite_free(healthUI->sprite);
 		healthUI->sprite = gf3d_ui_getTextSprite(str2, vector4d(255, 255, 255, 255), 100);
 	}
 }

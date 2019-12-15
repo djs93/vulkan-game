@@ -2,6 +2,7 @@
 #include "simple_logger.h"
 #include "game.h"
 #include "gf3d_ui.h"
+#include "gf3d_entity.h"
 
 void testClick(UIElement* self, UIElement* mouseEle)
 {
@@ -20,5 +21,85 @@ void startButtonClick(UIElement* self, UIElement* mouseEle)
 void contentEditorButtonClick(UIElement* self, UIElement* mouseEle)
 {
 	mainMenuToContentEditor();
-	mouseEle->hidden = true;
+}
+
+void saveClick(UIElement* self, UIElement* mouseEle)
+{
+}
+
+void platformClick(UIElement* self, UIElement* mouseEle)
+{
+	Entity_T* attachEnt = find_entity("axes_attach");
+	if (attachEnt) {
+		attachEnt->model = gf3d_model_load("platform_one");
+		attachEnt->type = "platform";
+	}
+}
+
+void spawnClick(UIElement* self, UIElement* mouseEle)
+{
+	if (find_entity("player")) { return; }
+	Entity_T* attachEnt = find_entity("axes_attach");
+	if (attachEnt) {
+		attachEnt->model = gf3d_model_load("teemo_000000");
+		attachEnt->model->texture = gf3d_texture_load("images/teemo.png");
+		attachEnt->type = "player";
+	}
+}
+
+void jumperClick(UIElement* self, UIElement* mouseEle)
+{
+	Entity_T* attachEnt = find_entity("axes_attach");
+	if (attachEnt) {
+		attachEnt->model = gf3d_model_load("robot_000000");
+		attachEnt->model->texture = gf3d_texture_load("images/robot.png");
+		attachEnt->type = "jumper";
+	}
+}
+
+void pacerClick(UIElement* self, UIElement* mouseEle)
+{
+	Entity_T* attachEnt = find_entity("axes_attach");
+	if (attachEnt) {
+		attachEnt->model = gf3d_model_load("penguin_000000");
+		attachEnt->model->texture = gf3d_texture_load("images/penguin.png");
+		attachEnt->type = "pacer";
+	}
+}
+
+void circlerClick(UIElement* self, UIElement* mouseEle)
+{
+	Entity_T* attachEnt = find_entity("axes_attach");
+	if (attachEnt) {
+		attachEnt->model = gf3d_model_load("circler_000000");
+		attachEnt->model->texture = gf3d_texture_load("images/circler.png");
+		attachEnt->type = "circler";
+	}
+}
+
+void mushroomClick(UIElement* self, UIElement* mouseEle)
+{
+	Entity_T* attachEnt = find_entity("axes_attach");
+	if (attachEnt) {
+		attachEnt->model = gf3d_model_load("shroom");
+		attachEnt->type = "mushroom";
+	}
+}
+
+void springClick(UIElement* self, UIElement* mouseEle)
+{
+	Entity_T* attachEnt = find_entity("axes_attach");
+	if (attachEnt) {
+		attachEnt->model = gf3d_model_load("spring");
+		attachEnt->type = "spring";
+	}
+}
+
+void speedClick(UIElement* self, UIElement* mouseEle)
+{
+	Entity_T* attachEnt = find_entity("axes_attach");
+	if (attachEnt) {
+		attachEnt->model = gf3d_model_load("speed_up");
+		attachEnt->type = "speed";
+	}
 }
