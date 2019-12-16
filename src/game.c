@@ -75,7 +75,7 @@ int main(int argc,char *argv[])
     init_logger("gf3d.log");    
     slog("gf3d begin");
     gf3d_vgraphics_init(
-        "gf3d",                 //program name
+        "Teemo Skok",                 //program name
 		window_width,           //screen width
 		window_height,          //screen height
         vector4d(0.51,0.75,1,1),//background color
@@ -448,16 +448,16 @@ int main(int argc,char *argv[])
 			}
 			//frame = frame + 0.1;
 			//level.framenum++;
-			level.time += 0.1f;
+			level.time += 0.4f;
 			if (state != GS_InGameMenu && state != GS_InContentEditor) {
-				level.modelTime += 0.1f;
+				level.modelTime += 0.4f;
 			}
 
 		}
 		else { //blank out the background (need to render nothing in model pipeline)
 			commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_graphics_model_pipeline());
 			gf3d_command_rendering_end(commandBuffer);
-			level.time += 0.1f;
+			level.time += 0.4f;
 		}
 		// 2D overlay rendering
 
@@ -547,7 +547,7 @@ void check_death() {
 }
 
 void setupMainMenu() {
-	UIElement* titleText = gf3d_ui_placeText("Gra Vulkan", 0, 50, vector4d(255, 255, 255, 255), 250);
+	UIElement* titleText = gf3d_ui_placeText("Teemo Skok", 0, 50, vector4d(255, 255, 255, 255), 250);
 	titleText->position.x = window_width/2 - titleText->sprite->frameWidth / 4;
 
 	UIElement* startButton = gf3d_ui_placeText("Zaczynac", 0, 700, vector4d(95, 100, 99, 255), 250);

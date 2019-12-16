@@ -30,6 +30,8 @@ void mushroom_touch(Entity_T* self, Entity_T* other)
 		sprintf(str2, "Zdrowie: %d", (int)player->health);
 		gf3d_sprite_free(healthUI->sprite);
 		healthUI->sprite = gf3d_ui_getTextSprite(str2, vector4d(255, 255, 255, 255), 100);
+
+		self->type = "collected mushroom";
 	}
 }
 

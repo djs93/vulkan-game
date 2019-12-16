@@ -80,7 +80,7 @@ Entity_T* find_entity(char* name) {
 	}
 	for (; from < &entity_list[gf3d_entity_manager.num_ents]; from++)
 	{
-		if (from->_inuse != 1 || !from->type)
+		if (from->_inuse != 1 || !from->type || !from->name)
 			continue;
 		if (!strcmp(from->name, name))
 			return from;
