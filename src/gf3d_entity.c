@@ -530,5 +530,18 @@ int get_type_count(char* type) {
 	return count;
 }
 
-
+float getLowestPoint() {
+	float result = 100000.0f;
+	int i;
+	for (i = 0; i < gf3d_entity_manager.entity_max; i++)
+	{
+		Entity_T* ent = &entity_list[i];
+		if (!ent->_inuse)continue;
+		if (!(strcmp(ent->type, "ground") == 0 || strcmp(ent->type, "platform") == 0))continue;
+		if (ent->position.z < result) {
+			result = ent->position.z;
+		}
+	}
+	return result;
+}
 /*eol@eof*/
