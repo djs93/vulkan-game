@@ -77,6 +77,7 @@ Entity *gf3d_entity_new();
  * @param self the entity to free
  */
 void    gf3d_entity_free(Entity_T *self);
+void gf3d_entity_free_all();
 
 /**
 * @brief get the index of the named entity
@@ -93,10 +94,13 @@ Entity_T* modeled_entity(char* modelName, char* entityName);
 
 Vector3D getAngles(Matrix4 mat);
 
-Entity_T* load_entity_json(char* entityName);
+Entity_T* load_entity_json(char * entityType);
 
 void save_entity_layout_json(Entity_T* entity);
 
 Entity_T* gf3d_nonanimated_entity_copy(Entity_T* entity);
 
+void save_all_content_editor();
+
+int get_type_count(char* type);
 #endif

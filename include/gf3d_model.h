@@ -38,6 +38,8 @@ typedef struct
 {
     Uint8                       _inuse;
     TextLine                    filename;
+	Uint32						startFrame;
+	Uint32						endFrame;
 	Uint32                      frameCount;         /**<how many frames are loaded for this model*/
 	Mesh**						mesh;
     Texture                 *   texture;

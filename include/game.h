@@ -1,7 +1,7 @@
 #ifndef __GAME_H__
 #define __GAME_H__
 
-#define ENTITY_MAX 30
+#define ENTITY_MAX 60
 #define UI_MAX 15
 typedef struct Entity_S Entity_T;
 
@@ -16,5 +16,7 @@ typedef enum
 GameState state;
 void mainMenuToLevelOne();
 void mainMenuToContentEditor();
+int loadLevel(char* levelFile);
+void toMainMenu();
 
 #endif

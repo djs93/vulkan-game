@@ -63,6 +63,16 @@ void gf3d_entity_free(Entity_T *self)
     }
 }
 
+void gf3d_entity_free_all()
+{
+	int i;
+	for (i = 0; i < gf3d_entity_manager.entity_max; i++)
+	{
+		if (!entity_list[i]._inuse)continue;
+		memset(&entity_list[i], 0, sizeof(Entity_T));
+	}
+}
+
 Entity_T* find_entity(char* name) {
 	Entity_T* from = entity_list;
 	if (!entity_list) {
@@ -169,9 +179,133 @@ Vector3D getAngles(Matrix4 mat) {
 	return res;
 }
 
-Entity_T* load_entity_json(char* entityName)
+Entity_T* load_entity_json(char * entityType)
 {
-	return NULL;
+	Entity_T* result; 
+	char* fileName = malloc(strlen("mobs/") + strlen(entityType) + strlen(".json") + 1);
+	strcpy(fileName, "mobs/");
+	strcat(fileName, entityType);
+	strcat(fileName, ".json");
+	SJson* file = sj_load(fileName);
+	if (!file)return NULL;
+	SJson* modelFileObj = sj_object_get_value(file, "modelFile");
+	char* modelFileChar = sj_get_string_value(modelFileObj);
+	SJson* animatedObj = sj_object_get_value(file, "animated");
+	char* animatedChar = sj_get_string_value(animatedObj);
+	if (strcmp(animatedChar, "true")==0) {
+		SJson* startFrameObj = sj_object_get_value(file, "startFrame");
+		int startFrame;
+		sj_get_integer_value(startFrameObj, &startFrame);
+		SJson* endFrameObj = sj_object_get_value(file, "endFrame");
+		int endFrame;
+		sj_get_integer_value(endFrameObj, &endFrame);
+		result = modeled_entity_animated(modelFileChar, NULL, startFrame, endFrame);
+	}
+	else {
+		result = modeled_entity(modelFileChar, NULL);
+	}
+	if (!result) {
+		slog("could not load %s from json!", modelFileChar);
+		return NULL;
+	}
+	result->name = sj_get_string_value(sj_object_get_value(file, "defaultname"));
+	result->type = sj_get_string_value(sj_object_get_value(file, "type"));
+
+	float* health = malloc(sizeof(float));
+	
+	sj_get_float_value(sj_object_get_value(file, "health"), health);
+	if (health)result->health = *health;
+	else result->health = 1.0f;
+
+	float* maxHealth = malloc(sizeof(float));
+	sj_get_float_value(sj_object_get_value(file, "healthmax"), maxHealth);
+	if (maxHealth)result->healthmax = *maxHealth;
+	else result->healthmax = 1.0f;
+
+	int* moveType = malloc(sizeof(int));
+	sj_get_integer_value(sj_object_get_value(file, "movetype"), moveType);
+	if (moveType)result->movetype = *moveType;
+	else result->movetype = MOVETYPE_NONE;
+
+	float* nextthink = malloc(sizeof(float));
+	sj_get_float_value(sj_object_get_value(file, "nextthink"), nextthink);
+	if (nextthink)result->nextthink = *nextthink;
+	else result->nextthink = 0.0f;
+
+	int* frame = malloc(sizeof(int));
+	sj_get_integer_value(sj_object_get_value(file, "frame"), frame);
+	if (frame)result->frame = *frame;
+	else result->frame = 1;
+
+	int* flags = malloc(sizeof(int));
+	sj_get_integer_value(sj_object_get_value(file, "flags"), flags);
+	if (flags)result->flags = *flags;
+	else result->flags = 0;
+
+	int* svflags = malloc(sizeof(int));
+	sj_get_integer_value(sj_object_get_value(file, "svflags"), svflags);
+	if (svflags)result->svflags = *svflags;
+	else result->svflags = 0;
+
+	SJson* aabbSizeArray = sj_object_get_value(file, "AABBSize");
+	float* x = malloc(sizeof(float));
+	float* y = malloc(sizeof(float));
+	float* z = malloc(sizeof(float));
+	sj_get_float_value(sj_array_get_nth(aabbSizeArray, 0), x);
+	sj_get_float_value(sj_array_get_nth(aabbSizeArray, 1), y);
+	sj_get_float_value(sj_array_get_nth(aabbSizeArray, 2), z);
+	result->boundingBox.size.x = *x;
+	result->boundingBox.size.y = *y;
+	result->boundingBox.size.z = *z;
+
+	SJson* aabbOffsetArray = sj_object_get_value(file, "AABBAdjustments");
+	sj_get_float_value(sj_array_get_nth(aabbOffsetArray, 0), x);
+	sj_get_float_value(sj_array_get_nth(aabbOffsetArray, 1), y);
+	sj_get_float_value(sj_array_get_nth(aabbOffsetArray, 2), z);
+	result->model->boudningAdjustment.x = *x;
+	result->model->boudningAdjustment.y = *y;
+	result->model->boudningAdjustment.z = *z;
+
+	SJson* maxSpeedArray = sj_object_get_value(file, "maxspeed");
+	sj_get_float_value(sj_array_get_nth(maxSpeedArray, 0), x);
+	sj_get_float_value(sj_array_get_nth(maxSpeedArray, 1), y);
+	sj_get_float_value(sj_array_get_nth(maxSpeedArray, 2), z);
+	result->maxspeed.x = *x;
+	result->maxspeed.y = *y;
+	result->maxspeed.z = *z;
+
+	float* specfloat = malloc(sizeof(float));
+	sj_get_float_value(sj_object_get_value(file, "specFloat1"), specfloat);
+	if (specfloat)result->specFloat1 = *specfloat;
+	else result->specFloat1 = 0.0f;
+
+	Entity_T* test = find_entity("player");
+	if (strcmp(entityType, "player")==0&&test) {
+		result->data = test->data;
+		result->data2 = test->data2;
+		result->specFloat1 = test->specFloat1;
+		result->health = test->health;
+		result->healthmax = test->healthmax;
+	}
+	else if (strcmp(entityType, "pacer")==0) {
+		Vector3D temp = vector3d(0, -10, 0);
+		result->data2 = &temp;
+		result->acceleration = temp;
+	}
+
+	free(health);
+	free(maxHealth);
+	free(moveType);
+	free(nextthink);
+	free(frame);
+	free(flags);
+	free(svflags);
+	free(x);
+	free(y);
+	free(z);
+	free(specfloat);
+
+	return result;
 }
 
 //Helper function to save entity data into a loadable format
@@ -194,6 +328,24 @@ void save_entity_layout_json(Entity_T* entity)
 	*/
 
 	if (entity->model) {
+		SJson* animated = NULL;
+		SJson* startFrame = NULL;
+		SJson* endFrame = NULL;
+		if (entity->model->frameCount > 1) {
+			animated = sj_new_bool(1);
+			startFrame = sj_new_int(entity->model->startFrame);
+			endFrame = sj_new_int(entity->model->endFrame);
+		}
+		else {
+			animated = sj_new_bool(0);
+		}
+		sj_object_insert(file, "animated", animated);
+		if (startFrame) {
+			sj_object_insert(file, "startFrame", startFrame);
+		}
+		if (endFrame) {
+			sj_object_insert(file, "endFrame", endFrame);
+		}
 		SJson* modelName = sj_new_str(entity->model->filename);
 		sj_object_insert(file, "modelFile", modelName);
 	}
@@ -316,6 +468,35 @@ void save_entity_layout_json(Entity_T* entity)
 	free(fileName);
 }
 
+SJson* save_entity_content_editor_json(Entity_T* entity) {
+	SJson* entJson = sj_object_new();
+	SJson* positionArray = sj_array_new();
+	sj_object_insert(entJson, "type", sj_string_to_value(sj_string_new_text(entity->type)));
+	sj_array_append(positionArray, sj_new_float(entity->position.x));
+	sj_array_append(positionArray, sj_new_float(entity->position.y));
+	sj_array_append(positionArray, sj_new_float(entity->position.z));
+	sj_object_insert(entJson, "position", positionArray);
+
+	return entJson;
+}
+
+void save_all_content_editor() {
+	Entity_T* ent;
+	int i;
+	SJson* saveFile = sj_object_new();
+	SJson* entArray = sj_array_new();
+	for (i = 0; i < gf3d_entity_manager.entity_max; i++)
+	{
+		if (!entity_list[i]._inuse)continue;
+		ent = &entity_list[i];
+		if (!ent->name || (strcmp(ent->name, "copied entity") != 0 && strcmp(ent->name, "player") != 0))continue;
+		sj_array_append(entArray, save_entity_content_editor_json(ent));
+	}
+	sj_object_insert(saveFile, "entities", entArray);
+	sj_object_insert(saveFile, "loadNext", sj_new_str("save.json"));
+	sj_save(saveFile, "save.json");
+}
+
 Entity_T* gf3d_nonanimated_entity_copy(Entity_T* entity)
 {
 	Entity_T* res = gf3d_entity_new();
@@ -334,7 +515,20 @@ Entity_T* gf3d_nonanimated_entity_copy(Entity_T* entity)
 	return res;
 }
 
-
+int get_type_count(char* type) {
+	Entity_T* ent = NULL;
+	int i;
+	int count = 0;
+	for (i = 0; i < gf3d_entity_manager.entity_max; i++)
+	{
+		if (!entity_list[i]._inuse)continue;
+		ent = &entity_list[i];
+		if (strcmp(ent->type, type) == 0) {
+			count++;
+		}
+	}
+	return count;
+}
 
 
 /*eol@eof*/

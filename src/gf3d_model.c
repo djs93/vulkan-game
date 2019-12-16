@@ -91,6 +91,8 @@ Model* gf3d_model_load_animated(char* filename, Uint32 startFrame, Uint32 endFra
 		return NULL;
 	}
 	model->frameCount = count;
+	model->startFrame = startFrame;
+	model->endFrame = endFrame;
 	model->mesh = (Mesh * *)gfc_allocate_array(sizeof(Mesh*), count);
 	model->extents = (Vector3D * *)gfc_allocate_array(sizeof(Vector3D*), count);
 	if (!model->mesh)

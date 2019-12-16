@@ -3,6 +3,7 @@
 #include "simple_logger.h"
 #include "gfc_vector.h"
 #include "gfc_matrix.h"
+#include "simple_json.h"
 
 #include "gf3d_vgraphics.h"
 #include "gf3d_pipeline.h"
@@ -24,8 +25,8 @@ Entity_T* entity_list;
 Entity_T* player;
 int window_width;
 int window_height;
-void draw_normal_entities();
-void draw_place_entities();
+void draw_normal_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame);
+void draw_place_entities(Uint32 bufferFrame, VkCommandBuffer commandBuffer, int frame);
 void sync_camera(Entity_T * ent, Vector3D offset);
 void setupMainMenu();
 void TestThink(Entity_T* self);
@@ -118,8 +119,29 @@ int main(int argc,char *argv[])
         SDL_PumpEvents();   // update SDL's internal event structures
 		SDL_GetMouseState(&mousex, &mousey);
 		keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
-
-		if (state != GS_InGame && state != GS_InContentEditor) {
+		if (state == GS_MainMenu) {
+			while (SDL_PollEvent(&event)) {
+				switch (event.type) {
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.scancode) {
+					case(SDL_SCANCODE_ESCAPE):
+						done = 1;
+						break;
+					default:
+						break;
+					}
+				case SDL_MOUSEBUTTONDOWN:
+					if (event.button.button == SDL_BUTTON_LEFT) {
+						gf3d_ui_doClick(mousex, mousey, mouseEle);
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			mouseEle->position = vector2d(mousex, mousey);
+		}
+		else if (state == GS_InGameMenu) {
 			while (SDL_PollEvent(&event)) {
 				switch (event.type) {
 				case SDL_MOUSEBUTTONDOWN:
@@ -134,10 +156,18 @@ int main(int argc,char *argv[])
 			mouseEle->position = vector2d(mousex, mousey);
 		}
 		else if (state == GS_InGame) {
+			if (get_type_count("mushroom") == 0) {
+				if (loadLevel(level.nextmap)) {
+					toMainMenu();
+				}
+			}
 			while (SDL_PollEvent(&event)) {
 				switch (event.type) {
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.scancode) {
+					case(SDL_SCANCODE_ESCAPE):
+						toMainMenu();
+						break;
 					case(SDL_SCANCODE_D):
 						if (abs(player->acceleration.x - accel) <= accel) {
 							player->acceleration.x -= accel;
@@ -253,39 +283,60 @@ int main(int argc,char *argv[])
 					switch (event.type) {
 					case SDL_KEYDOWN:
 						switch (event.key.keysym.scancode) {
+						case(SDL_SCANCODE_ESCAPE):
+							toMainMenu();
+							break;
 						case(SDL_SCANCODE_D):
 							positionChanged = true;
 							vector3d_add(pos, pos, vector3d(0.2, 0, 0));
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								vector3d_add(pos, pos, vector3d(0.2, 0, 0));
+							}
 							teleport_entity(axes, pos);
 							teleport_entity(axesAttach, pos);
 							break;
 						case(SDL_SCANCODE_A):
 							positionChanged = true;
 							vector3d_add(pos, pos, vector3d(-0.2, 0, 0));
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								vector3d_add(pos, pos, vector3d(-0.2, 0, 0));
+							}
 							teleport_entity(axes, pos);
 							teleport_entity(axesAttach, pos);
 							break;
 						case(SDL_SCANCODE_W):
 							positionChanged = true;
 							vector3d_add(pos, pos, vector3d(0, 0.2, 0));
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								vector3d_add(pos, pos, vector3d(0, 0.2, 0));
+							}
 							teleport_entity(axes, pos);
 							teleport_entity(axesAttach, pos);
 							break;
 						case(SDL_SCANCODE_S):
 							positionChanged = true;
 							vector3d_add(pos, pos, vector3d(0, -0.2, 0));
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								vector3d_add(pos, pos, vector3d(0, -0.2, 0));
+							}
 							teleport_entity(axes, pos);
 							teleport_entity(axesAttach, pos);
 							break;
 						case(SDL_SCANCODE_Q):
 							positionChanged = true;
 							vector3d_add(pos, pos, vector3d(0, 0, -0.2));
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								vector3d_add(pos, pos, vector3d(0, 0, -0.2));
+							}
 							teleport_entity(axes, pos);
 							teleport_entity(axesAttach, pos);
 							break;
 						case(SDL_SCANCODE_E):
 							positionChanged = true;
 							vector3d_add(pos, pos, vector3d(0, 0, 0.2));
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								vector3d_add(pos, pos, vector3d(0, 0, 0.2));
+							}
 							teleport_entity(axes, pos);
 							teleport_entity(axesAttach, pos);
 							break;
@@ -297,21 +348,39 @@ int main(int argc,char *argv[])
 							break;
 						case(SDL_SCANCODE_J):
 							contentOffset.x -= cameraSpeed*2;
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								contentOffset.x -= cameraSpeed * 2;
+							}
 							break;
 						case(SDL_SCANCODE_L):
 							contentOffset.x += cameraSpeed * 2;
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								contentOffset.x += cameraSpeed * 2;
+							}
 							break;
 						case(SDL_SCANCODE_I):
 							contentOffset.y += cameraSpeed * 2;
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								contentOffset.y += cameraSpeed * 2;
+							}
 							break;
 						case(SDL_SCANCODE_K):
 							contentOffset.y -= cameraSpeed * 2;
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								contentOffset.y -= cameraSpeed * 2;
+							}
 							break;
 						case(SDL_SCANCODE_U):
 							contentOffset.z += cameraSpeed;
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								contentOffset.z += cameraSpeed;
+							}
 							break;
 						case(SDL_SCANCODE_O):
 							contentOffset.z -= cameraSpeed;
+							if (keys[SDL_SCANCODE_LSHIFT]) {
+								contentOffset.z -= cameraSpeed;
+							}
 							break;
 						default:
 							break;
@@ -362,7 +431,7 @@ int main(int argc,char *argv[])
 
 			draw_normal_entities(bufferFrame, commandBuffer, (int)level.modelTime);
 			if(player && state ==GS_InGame){
-				sync_camera(player, vector3d(5, 60, 15));
+				sync_camera(player, vector3d(10, 70, 30));
 			}
 			else if(player && state==GS_InContentEditor) {
 				sync_camera(player, contentOffset);
@@ -397,8 +466,6 @@ int main(int argc,char *argv[])
 
 		gf3d_command_rendering_end(commandBuffer);
 		gf3d_vgraphics_render_end(bufferFrame);
-
-        if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
     }    
     
     vkDeviceWaitIdle(gf3d_vgraphics_get_default_logical_device());    
@@ -522,7 +589,7 @@ void setupLevelOne() {
 	ent1->model->boudningAdjustment.z = 1.2f;
 	ent1->type = "player";
 	ent1->data = 0;
-	save_entity_layout_json(player);
+	//save_entity_layout_json(player);
 
 	//Entity_T* ent2 = modeled_entity_animated("ezreal", "Ezreal2", 0, 1);
 	//ent2->movetype = MOVETYPE_STEP;
@@ -532,8 +599,12 @@ void setupLevelOne() {
 	//ent2->model->boudningAdjustment.z = -1.5f;
 
 	Entity_T* ent3 = modeled_entity("ground", "ground");
+	ent3->type = "ground";
+	//save_entity_layout_json(ent3);
 	Entity_T* ground2 = modeled_entity("ground", "ground2");
-	Entity_T* ent4 = modeled_entity("platform_one", "plat1");
+	Entity_T* ent4 = modeled_entity("platform_one", "platform");
+	ent4->type = "platform";
+	//save_entity_layout_json(ent4);
 	Entity_T* ent5 = modeled_entity("platform_one", "plat2");
 	Entity_T* ent6 = modeled_entity("platform_one", "plat3");
 	//teleport_entity(ent2, vector3d(20, 0, 0));
@@ -544,7 +615,6 @@ void setupLevelOne() {
 	teleport_entity(ent6, vector3d(60, -40, 10));
 
 	Entity_T* shroom1 = modeled_entity("shroom", "shroom1");
-	teleport_entity(shroom1, vector3d(0, -40, -10));
 	shroom1->movetype = MOVETYPE_NOCLIP;
 	shroom1->think = mushroom_think;
 	shroom1->nextthink = 0.1f;
@@ -553,9 +623,11 @@ void setupLevelOne() {
 	shroom1->healthmax = 1.0f;
 	shroom1->health = shroom1->healthmax;
 	shroom1->type = "mushroom";
+	//save_entity_layout_json(shroom1);
+
+	teleport_entity(shroom1, vector3d(0, -40, -10));
 
 	Entity_T* spring1 = modeled_entity("spring", "spring1");
-	teleport_entity(spring1, vector3d(-20, -40, -10));
 	spring1->movetype = MOVETYPE_NOCLIP;
 	spring1->think = spring_think;
 	spring1->nextthink = 0.1f;
@@ -563,9 +635,11 @@ void setupLevelOne() {
 	spring1->die = spring_die;
 	spring1->healthmax = 1.0f;
 	spring1->health = spring1->healthmax;
+	spring1->type = "spring";
+	//save_entity_layout_json(spring1);
+	teleport_entity(spring1, vector3d(-20, -40, -10));
 
 	Entity_T* speedup1 = modeled_entity("speed_up", "speedup1");
-	teleport_entity(speedup1, vector3d(-40, -40, -10));
 	speedup1->movetype = MOVETYPE_NOCLIP;
 	speedup1->think = speed_up_think;
 	speedup1->nextthink = 0.1f;
@@ -573,7 +647,11 @@ void setupLevelOne() {
 	speedup1->die = speed_up_die;
 	speedup1->healthmax = 1.0f;
 	speedup1->health = speedup1->healthmax;
+	speedup1->type = "speed";
+	//save_entity_layout_json(speedup1);
+	teleport_entity(speedup1, vector3d(-40, -40, -10));
 
+	Vector3D accelV3 = vector3d(10, 0, 0);
 	Entity_T* pacer = modeled_entity_animated("penguin", "pacer", 0, 25);
 	pacer->model->boudningAdjustment.z = -0.75f;
 	pacer->movetype = MOVETYPE_STEP;
@@ -581,15 +659,14 @@ void setupLevelOne() {
 	pacer->maxspeed = vector3d(900.0f, 900.0f, 10000.0f);
 	pacer->healthmax = 1.0f;
 	pacer->health = pacer->healthmax;
-
 	pacer->think = pacer_think;
 	pacer->nextthink = 0.1f;
 	pacer->touch = pacer_touch;
 	pacer->die = pacer_die;
-
-	Vector3D accelV3 = vector3d(10, 0, 0);
 	pacer->data2 = &accelV3;
 	pacer->acceleration = accelV3;
+	pacer->type = "pacer";
+	//save_entity_layout_json(pacer);
 
 	Entity_T* jumper = modeled_entity_animated("robot", "jumper", 0, 24);
 	jumper->model->boudningAdjustment.z = -1.9f;
@@ -602,11 +679,12 @@ void setupLevelOne() {
 	jumper->maxspeed = vector3d(800.0f, 800.0f, 10000.0f);
 	jumper->healthmax = 1.0f;
 	jumper->health = jumper->healthmax;
-
 	jumper->think = jumper_think;
 	jumper->nextthink = 0.1f;
 	jumper->touch = jumper_touch;
 	jumper->die = jumper_die;
+	jumper->type = "jumper";
+	//save_entity_layout_json(jumper);
 
 	Entity_T* circler = modeled_entity_animated("circler", "circler", 0, 20);
 	circler->model->boudningAdjustment.z = -0.9f;
@@ -615,11 +693,12 @@ void setupLevelOne() {
 	circler->maxspeed = vector3d(800.0f, 800.0f, 10000.0f);
 	circler->healthmax = 1.0f;
 	circler->health = circler->healthmax;
-
 	circler->think = circler_think;
 	circler->nextthink = 0.1f;
 	circler->touch = circler_touch;
 	circler->die = circler_die;
+	circler->type = "circler";
+	//save_entity_layout_json(circler);
 
 	teleport_entity(pacer, vector3d(20, 20, 0));
 	teleport_entity(jumper, vector3d(60, -40, 20));
@@ -653,6 +732,7 @@ void setupContentEditor() {
 	UIElement* saveButton = gf3d_ui_placeText("Zapisac", 0, 5, vector4d(200,200,200,200), 75);
 	saveButton->position.x = window_width / 2 - saveButton->sprite->frameWidth / 4;
 	saveButton->name = "save button";
+	saveButton->onClick = saveClick;
 
 	char str[50];
 	sprintf(str, "Pozycja: %f, %f, %f", player->position.x, player->position.y, player->position.z);
@@ -705,4 +785,107 @@ void setupContentEditor() {
 
 	state = GS_InContentEditor;
 }
+
+int loadLevel(char* levelFile) {
+	gf3d_entity_free_all();
+	SJson* levelJson = sj_load(levelFile);
+	if (!levelJson) {
+		return 1;
+	}
+	SJson* entityArray = sj_object_get_value(levelJson, "entities");
+	int i, count;
+	float x, y, z;
+	count = sj_array_get_count(entityArray);
+	for (i = 0; i < count; i++) {
+		SJson* element = sj_array_get_nth(entityArray, i);
+		SJson* strObj = sj_object_get_value(element, "type");
+		char* strChar = sj_get_string_value(strObj);
+		Entity_T* spawnEnt = load_entity_json(strChar);
+
+		if (strcmp(strChar, "player") == 0) {
+			player = spawnEnt;
+			spawnEnt->think = player_think;
+		}
+		else if (strcmp(strChar, "mushroom") == 0) {
+			spawnEnt->think = mushroom_think;
+			spawnEnt->touch = mushroom_touch;
+			spawnEnt->die = mushroom_die;
+		}
+		else if (strcmp(strChar, "spring") == 0) {
+			spawnEnt->think = spring_think;
+			spawnEnt->touch = spring_touch;
+			spawnEnt->die = spring_die;
+		}
+		else if (strcmp(strChar, "speed") == 0) {
+			spawnEnt->think = speed_up_think;
+			spawnEnt->touch = speed_up_touch;
+			spawnEnt->die = speed_up_die;
+		}
+		else if (strcmp(strChar, "pacer") == 0) {
+			spawnEnt->think = pacer_think;
+			spawnEnt->touch = pacer_touch;
+			spawnEnt->die = pacer_die;
+		}
+		else if (strcmp(strChar, "jumper") == 0) {
+			spawnEnt->think = jumper_think;
+			spawnEnt->touch = jumper_touch;
+			spawnEnt->die = jumper_die;
+		}
+		else if (strcmp(strChar, "circler") == 0) {
+			spawnEnt->think = circler_think;
+			spawnEnt->touch = circler_touch;
+			spawnEnt->die = circler_die;
+		}
+
+		SJson* posArray = sj_object_get_value(element, "position");
+		sj_get_float_value(sj_array_get_nth(posArray, 0), &x);
+		sj_get_float_value(sj_array_get_nth(posArray, 1), &y);
+		sj_get_float_value(sj_array_get_nth(posArray, 2), &z);
+		teleport_entity(spawnEnt, vector3d(x, y, z));
+		
+	}
+
+	if (!gf3d_ui_find("mushroom Count")) {
+		char str[14];
+		sprintf(str, "Grzyby: %d", (int)player->data);
+		UIElement* mushroomCount = gf3d_ui_placeText(str, 10, 10, vector4d(255, 255, 255, 255), 100);
+		mushroomCount->name = "mushroom Count";
+	}
+	else {
+		UIElement* count = gf3d_ui_find("mushroom Count");
+		char str[14];
+		sprintf(str, "Grzyby: %d", (int)player->data);
+		gf3d_sprite_free(count->sprite);
+		count->sprite = gf3d_ui_getTextSprite(str, vector4d(255, 255, 255, 255), 100);
+	}
+
+	if (!gf3d_ui_find("health")) {
+		char str2[14];
+		sprintf(str2, "Zdrowie: %d", (int)player->health);
+		UIElement* healthUI = gf3d_ui_placeText(str2, 10, 10, vector4d(255, 255, 255, 255), 100);
+		healthUI->position.x = window_width - healthUI->sprite->frameWidth / 2 - 10;
+		healthUI->name = "health";
+	}
+	else {
+		UIElement* healthUI = gf3d_ui_find("health");
+		char str2[14];
+		sprintf(str2, "Zdrowie: %d", (int)player->health);
+		gf3d_sprite_free(healthUI->sprite);
+		healthUI->sprite = gf3d_ui_getTextSprite(str2, vector4d(255, 255, 255, 255), 100);
+	}
+
+	state = GS_InGame;
+	strcpy(level.level_name, levelFile);
+	strcpy(level.nextmap, sj_get_string_value(sj_object_get_value(levelJson, "loadNext")));
+	return 0;
+}
+
+void toMainMenu() {
+	gf3d_ui_free_all_but_mouse();
+	gf3d_entity_free_all();
+	setupMainMenu();
+	state = GS_MainMenu;
+	gf3d_ui_find("mouse")->hidden = false;
+}
+
 /*eol@eof*/

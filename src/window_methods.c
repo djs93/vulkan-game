@@ -13,7 +13,9 @@ void testClick(UIElement* self, UIElement* mouseEle)
 
 void startButtonClick(UIElement* self, UIElement* mouseEle)
 {
-	mainMenuToLevelOne();
+	//mainMenuToLevelOne();
+	gf3d_ui_free_all_but_mouse();
+	loadLevel("level1.json");
 	mouseEle->hidden = true;
 }
 
@@ -25,6 +27,7 @@ void contentEditorButtonClick(UIElement* self, UIElement* mouseEle)
 
 void saveClick(UIElement* self, UIElement* mouseEle)
 {
+	save_all_content_editor();
 }
 
 void platformClick(UIElement* self, UIElement* mouseEle)
