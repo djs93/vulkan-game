@@ -264,13 +264,13 @@ int main(int argc,char *argv[])
 			}
 
 			update_physics_positions();
-			//update_physics_positions();
-			//update_physics_positions();
-			//update_physics_positions();
+			update_physics_positions();
+			update_physics_positions();
+			update_physics_positions();
 			check_death();
-			//check_death();
-			//check_death();
-			//check_death();
+			check_death();
+			check_death();
+			check_death();
 		}
 		else if (state == GS_InContentEditor) {
 			Entity_T* axes = find_entity("axes");
