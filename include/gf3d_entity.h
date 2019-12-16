@@ -103,4 +103,5 @@ Entity_T* gf3d_nonanimated_entity_copy(Entity_T* entity);
 void save_all_content_editor();
 
 int get_type_count(char* type);
+float getLowestPoint();
 #endif
