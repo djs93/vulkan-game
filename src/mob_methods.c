@@ -168,6 +168,10 @@ void player_think(Entity_T* self) {
 		vector3d_add(futurePoint, self->position, self->velocity);
 		look_towards(self, futurePoint);
 	}
+
+	if (self->position.z < getLowestPoint()) {
+		self->health = 0.0f;
+	}
 	
 	self->nextthink = 0.1f;
 }

@@ -68,7 +68,6 @@ void gf3d_entity_free_all()
 	int i;
 	for (i = 0; i < gf3d_entity_manager.entity_max; i++)
 	{
-		if (!entity_list[i]._inuse)continue;
 		memset(&entity_list[i], 0, sizeof(Entity_T));
 	}
 }
@@ -81,7 +80,7 @@ Entity_T* find_entity(char* name) {
 	}
 	for (; from < &entity_list[gf3d_entity_manager.num_ents]; from++)
 	{
-		if (!from->_inuse)
+		if (from->_inuse != 1 || !from->type)
 			continue;
 		if (!strcmp(from->name, name))
 			return from;

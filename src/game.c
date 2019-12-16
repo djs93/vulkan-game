@@ -725,9 +725,11 @@ void setupLevelOne() {
 void setupContentEditor() {
 	Entity_T* axis = modeled_entity("axes", "axes");
 	player = axis;
+	axis->type = "axis";
 
 	Entity_T* attach = modeled_entity("axes", "axes_attach");
 	attach->model = NULL;
+	attach->type = "axes_attach";
 
 	UIElement* saveButton = gf3d_ui_placeText("Zapisac", 0, 5, vector4d(200,200,200,200), 75);
 	saveButton->position.x = window_width / 2 - saveButton->sprite->frameWidth / 4;
