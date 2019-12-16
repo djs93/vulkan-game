@@ -71,6 +71,7 @@ int main(int argc,char *argv[])
 		}
     }
     
+
     init_logger("gf3d.log");    
     slog("gf3d begin");
     gf3d_vgraphics_init(
@@ -79,9 +80,9 @@ int main(int argc,char *argv[])
 		window_height,          //screen height
         vector4d(0.51,0.75,1,1),//background color
         0,                      //fullscreen
-        validate,               //validation
-		trace,					//vktrace validation layer
-		dump					//api dump validation layer
+        0,               //validation
+		1,					//vktrace validation layer
+		1					//api dump validation layer
     );
     
     // main game loop
