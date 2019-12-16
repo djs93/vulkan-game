@@ -38,7 +38,7 @@ int main(int argc,char *argv[])
 {
     int done = 0;
     int a;
-    Uint8 validate = 1;
+    Uint8 validate = 0;
 	float frame = 0;
 	level.time = 0;
 	level.modelTime = 0;
