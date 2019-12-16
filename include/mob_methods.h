@@ -20,6 +20,7 @@ void pacer_touch(Entity_T* self, Entity_T* other);
 void pacer_die(Entity_T* self);
 
 void player_think(Entity_T* self);
+void player_die(Entity_T* self);
 
 void jumper_think(Entity_T* self);
 void jumper_touch(Entity_T* self, Entity_T* other);

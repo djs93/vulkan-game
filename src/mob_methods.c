@@ -1,6 +1,7 @@
 #include "mob_methods.h"
 #include "simple_logger.h"
 #include "gf3d_ui.h"
+#include "local.h"
 
 void set_rotation(Matrix4 out, Matrix4 in, Vector3D theta);
 void mushroom_think(Entity_T* self)
@@ -169,6 +170,11 @@ void player_think(Entity_T* self) {
 	}
 	
 	self->nextthink = 0.1f;
+}
+
+void player_die(Entity_T* self) {
+	//look where you're going
+	loadLevel(level.level_name);
 }
 
 void jumper_think(Entity_T* self)

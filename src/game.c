@@ -805,6 +805,7 @@ int loadLevel(char* levelFile) {
 		if (strcmp(strChar, "player") == 0) {
 			player = spawnEnt;
 			spawnEnt->think = player_think;
+			spawnEnt->die = player_die;
 		}
 		else if (strcmp(strChar, "mushroom") == 0) {
 			spawnEnt->think = mushroom_think;
